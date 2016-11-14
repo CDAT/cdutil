@@ -687,6 +687,46 @@ class VariablesMatcher(object):
     VariableConditioner.
     """
     def __init__(self,variableConditioner1=None,variableConditioner2=None,externalVariableConditioner=None,weightedGridMaker=None,cdmsArguments=[],cdmsKeywords={}):
+        """
+        :param variableConditioner1: a VariableConditioner object or a file name or a transient variable
+                (from which a VariableConditioner will be constructed). It may also be a tuple comprising a transient
+                variable plus a fraction associated with each cell (which will be used in constructing "weights").
+                If variableConditioner1 is a file name, then the user must also define the name of the variable
+                (e.g., VM.variableConditioner1.var='tas').
+        :type :py:class:`VariableConditioner` or str or transient variable
+
+        :param variableConditioner2: as variableConditioner1, except if variable 2 is not on the same grid as variable 1
+                after all processing is completed, then variable 2 will be mapped to variable 1's grid.
+        :type variableConditioner2: :py:class:`VariableConditioner`
+
+        :param externalVariableConditioner: optional argument used to mask both variable 1 and variable 2 with its own
+                mask. Variable 1 and variable 2 are mapped to the external variable grid before applying the mask.
+                The external variable weights are applied (except where the weights associated with the variables are
+                zero) The externalVariableConditioner is generally not needed unless an external time-varying mask is
+                to be applied.
+        :type externalVariableConditioner: :py:class:`VariableConditioner`
+
+        :param weightedGridMaker: an optional :py:class:`WeightedGridMaker` object that defines the target grid to which
+                variable 1 and variable 2 should be mapped as a last step.
+
+                .. note::
+                    If a WeightsMaker is associated with the WeightedGridMaker object,
+                    then the mask will be applied to the data after regridding.
+        :type weightedGridMaker: :py:class:`WeightedGridMaker`
+
+        :param cdmsArguments: a tuple of optional arguments used when retrieving a variable with cdms. (For example,
+                cdmsArguments=(cdutil.region.NH) specifies that data should be retrieved from the Northern Hemisphere
+                only).  See the cdms documentation for more information.  The cdmsArguments set here will replace all
+                arguments that might be set for individual VariableConditioner objects (i.e., "1", "2" and "external").
+        :type cdmsArguments: tuple
+
+        :param cdmsKeywords: a dictionary defining "keyword:value" pairs used when retrieving a variable with cdms.
+                For example, cdmsKeywords= {'latitude:(-90.0, 0.0)} specifies that data should be retrieved from the
+                Southern Hemisphere only.  See the cdms documentation for more information.
+                The cdmsKeywords set here will be appended to or take the place of those that might be set for
+                individual VariableConditioner objects (i.e., "1", "2" and "external").
+        :type cdmsKeywords: dict
+        """
         # First  VariableConditioner
         if isinstance(variableConditioner1,VariableConditioner):
             self.variableConditioner1=variableConditioner1
