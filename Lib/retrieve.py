@@ -141,6 +141,11 @@ class GridAxis(object):
     
 
 class WeightedGridMaker(object):
+    """The WeightedGridMaker generates a cdms grid object (see cdms documentation for a description)
+    and may also associate a WeightsMaker object with that grid.  The WeightedGridMaker object may be used by the
+    VariableConditioner object to define a "target" grid to which the variable will be mapped.
+    The WeightedGridMaker must be either provided with a cdms grid object or with information needed to generate a grid.
+    """
     def __init__(self,
                  source=None,
                  var=None,
@@ -149,6 +154,46 @@ class WeightedGridMaker(object):
                  nlon=None,flon=None,dellon=None,
                  weightsMaker=None
                  ):
+        """
+
+        :param source: a cdms grid object or a file name (in which case the keyword "var" must be defined).
+                Other keywords (except "var" and "WeightsMaker") will be ignored if "source" is a file name.
+        :type source:
+
+        :param var: the name of the variable that is needed from the file specified in the "source" argument
+                (except when "source" refers directly to a grid object, in which case this argument is ignored).
+        :type var: str
+
+        :param nlat: the number of latitudes spanning the domain (which is ignored if "source" is a file name).
+        :type nlat: float
+
+        :param flat: the location of the first latitude (which is ignored if "source" is a file name or if "type" is
+                'gaussian' or 'equal').
+        :type flat: float
+
+        :param dellat: the latitude spacing (which is ignored if "source" is a file name or if "type" is
+                'gaussian' or 'equal').
+        :type dellat: float
+
+        :param grid_type: the type of grid that will be generated.  Options include: 'uniform' (equally spaced),
+                'gaussian' (for use with spectral models), and 'equal' (for latitude spacing giving equal area grid
+                cells as in the lmd5 model). This keyword will be ignored if "source" is a file name.
+        :type grid_type: str
+
+        :param nlon: the number of longitudes spanning the domain (which is ignored if "source" is a file name).
+        :type nlon: float
+
+        :param flon: the location of the first longitude (which by default is set to 0.0 but is ignored if "source"
+                is a file name).
+        :type flon: float
+
+        :param dellon: the longitude spacing (which is ignored if the "source" is a file name).
+        :type dellon: float
+
+        :param weightsMaker: a :py:class:`WeightsMaker` object that should occupy the same grid as that returned by
+                :py:class:`WeightedGridMaker`.
+        :type weightsMaker: :py:class:`WeightsMaker`
+        """
         self.longitude=GridAxis()
         self.latitude=GridAxis()
         self.longitude.n=nlon
@@ -254,7 +299,53 @@ class VariableConditionerError(WeightedGridMakerError):
     pass
 
 class VariableConditioner(object):
+    """The VariableConditioner constructor must be provided either with a transient variable or with information
+        that will be used to define a masked variable.  Optional, additional information may be provided to indicate
+        how the data should be mapped to a new grid, what masks should be applied, and how to scale and offset the data
+        (to transform, for example, to alternative units). """
     def __init__(self,source,var=None,weightsMaker=None,weightedGridMaker=None,offset=0.,slope=1.,cdmsArguments=None,cdmsKeywords=None,id=None,preprocess=None,preprocessKeywords={},comments=''):
+        """
+        :param source: a file name or a transient variable.  If an array is passed, a second associated array may also
+                be passed (in which case source is a tuple), which contains the fraction of each grid cell
+                for which the data value applies.  This fraction will be used if the variable is regridded.
+        :type source:
+
+        :param var: the name of the variable that is needed from the file specified in the "source" argument
+                (except when "source" refers directly to a variable, in which case this argument is ignored).
+        :type var: str
+
+        :param cdmsArguments: a tuple or list of optional arguments used when retrieving a variable with cdms.
+                For example, cdmsArguments=(cdutil.region.NH) specifies that data should be retrieved from the
+                Northern Hemisphere only).  See the cdms documentation for more information.
+        :type cdmsArguments: tuple
+
+        :param cdmsKeywords: a dictionary defining "keyword:value" pairs used when retrieving a variable with cdms.
+                For example, cdmsKeywords= {'latitude:(-90.0, 0.0)} specifies that data should be retrieved from the
+                Southern Hemisphere only.  See the cdms documentation for more information.
+        :type cdmsKeywords: dict
+
+        :param weightsMaker: a WeightsMaker object that should be applied to the masked variable (before any regridding).
+        :type weightsMaker:
+
+        :param weightedGridMaker: a WeightedGridMaker object that defines the target grid to which the data should be
+                mapped.
+
+                .. note::
+
+                    If a WeightsMaker is associated with the WeightedGridMaker object, then that mask will be
+                    applied to the data after regridding.
+        :type weightedGridMaker: :py:class:`WeightsMaker`
+
+        :param offset: used to change units of the variable by multiplying the data by "slope" and adding "offset" to the result.
+        :type offset: float
+
+        :param slope: used to change units of the variable by multiplying the data by "slope" and adding "offset" to the result.
+        :type slope: float
+
+        :param id: a string that can be used to identify your VariableConditioner object,
+                but it is purely informational and not used otherwise.
+        :type id: str
+        """
         self.id=id
         self.var=var
         self.offset=offset

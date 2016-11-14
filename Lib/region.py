@@ -2,13 +2,15 @@
 from cdms2.selectors import SelectorComponent
 import cdat_info
 class DomainComponent(SelectorComponent):
-    """gets a domain, and by default adjusts the bounds to the domain
+    """ Gets a domain, and by default adjusts the bounds to the domain
     or if exact is set to 0 or None gets all the domain that has
     parts of the domain requested, also post processing allows you to apply a mask
     dimension names can be passed as keywords,
     but if no name is passed arguments are taken in order and applied to the corresponding axis
     Overwritting an axis (2 keywords or keyword + argument) is not allowed
-    Example of use:
+
+    :Example:
+
     NH=cdms.selectors.Selector(domain(latitude=(0.,90.)))
     """
     
