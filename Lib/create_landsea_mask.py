@@ -1,6 +1,7 @@
 import cdms2,MV2,sys,os
 import cdat_info
 
+
 def create_surrounds(data):
     sh=list(data.shape)
     L=data.getAxis(1)
@@ -94,6 +95,7 @@ def map2four(data,target,regridTool='regrid2'):
 
     return out
 
+
 def improve(mask,navy_frac_t,threshold_1,threshold_2,UL,UC,UR,ML,MR,LL,LC,LR,regridTool='regrid2'):
     mask_approx = map2four(mask,mask.getGrid(),regridTool=regridTool)
     diff =  navy_frac_t - mask_approx
@@ -159,19 +161,28 @@ def improve(mask,navy_frac_t,threshold_1,threshold_2,UL,UC,UR,ML,MR,LL,LC,LR,reg
     mask2.setAxisList(mask.getAxisList())
     return mask2
 
+
 def generateLandSeaMask(target,source=None,threshold_1 = .2, threshold_2 = .3,regridTool='regrid2'):
-    """ Generates a best guess mask on any rectilinear grid, using the method described in PCMDI's report #58
-    see: http://www-pcmdi.llnl.gov/publications/ab58.html
-    Input:
-       target: either a MV2 object with a grid, or a cdms2 grid (rectilinear grid only)
-       source: A fractional (0 to 1.) land sea mask, where 1 means all land
-       threshold_1 (optional): criteria 1 for detecting cells with possible increment see report for detail
-                               difference threshold
-       threshold_2 (optional): criteria 2 for detecting cells with possible increment see report for detail
-                               water/land content threshold
-       regridTool: which cdms2 regridder tool to use, default is regrid2
-    Output:
-       landsea maks on target grid
+    """
+    Generates a best guess mask on any rectilinear grid, using the method described in `PCMDI's report #58`_
+
+    .. _PCMDI's report #58: http://www-pcmdi.llnl.gov/publications/pdf/58.pdf
+
+    :param target: either a MV2 object with a grid, or a cdms2 grid (rectilinear grid only)
+    :type target: MV2 or cdms2
+    :param source: A fractional (0 to 1.) land sea mask, where 1 means all land
+    :type source: float
+    :param threshold_1: criteria 1 for detecting cells with possible increment see report for detail
+                        difference threshold
+    :type threshold_1: float
+    :param threshold_2: criteria 2 for detecting cells with possible increment see report for detail
+                        water/land content threshold
+    :type threshold_2: float
+    :param regridTool: which cdms2 regridder tool to use, default is regrid2
+    :type regridTool:
+
+    :returns: landsea mask on target grid
+    :rtype:
     """
     cdat_info.pingPCMDIdb("cdat","cdutil.generateLandSeaMask")
     if cdms2.isVariable(target):

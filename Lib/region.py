@@ -2,7 +2,7 @@
 from cdms2.selectors import SelectorComponent
 import cdat_info
 class DomainComponent(SelectorComponent):
-    '''gets a domain, and by default adjusts the bounds to the domain
+    """gets a domain, and by default adjusts the bounds to the domain
     or if exact is set to 0 or None gets all the domain that has
     parts of the domain requested, also post processing allows you to apply a mask
     dimension names can be passed as keywords,
@@ -10,10 +10,10 @@ class DomainComponent(SelectorComponent):
     Overwritting an axis (2 keywords or keyword + argument) is not allowed
     Example of use:
     NH=cdms.selectors.Selector(domain(latitude=(0.,90.)))
-    '''
+    """
     
     def __init__(self,*args,**kargs):
-        ''' initialise some value such as tolerances for equality'''
+        """ initialise some value such as tolerances for equality"""
         self.args=args
         self.kargs=kargs
         self.atol=kargs.get('atol',1.E-8)
@@ -36,7 +36,7 @@ class DomainComponent(SelectorComponent):
         return s
     
     def specify(self,slab,axes,specification,confined_by,aux):
-        ''' First part: confine the slab within a Domain wide enough to do the exact in post'''
+        """ First part: confine the slab within a Domain wide enough to do the exact in post"""
         import string,copy
         from numpy.ma import minimum,maximum
         # myconfined is for later, we can't confine a dimension twice with an argument plus a keyword or 2 keywords
@@ -146,11 +146,11 @@ class DomainComponent(SelectorComponent):
         return 0
     
     def same(self,data,value):
-        ''' Check if data is basically the same than value'''
+        """ Check if data is basically the same than value"""
         return abs(data-value)<self.atol+self.rtol*abs(value)
     
     def post(self,fetched,slab,axes,specifications,confined_by,aux,axismap):
-        ''' Post processing retouches the bounds and later will deal with the mask'''
+        """ Post processing retouches the bounds and later will deal with the mask"""
         import cdms2 as cdms
         fetched=cdms.createVariable(fetched,copy=1)
         faxes=fetched.getAxisList()
@@ -164,9 +164,9 @@ class DomainComponent(SelectorComponent):
                         raise ValueError, 'Region error, axis:'+ax.id+' has no bounds'
                     ax0=ax[0]
                     ax1=ax[-1]
-                    '''sets xb with the bounds
+                    """sets xb with the bounds
                     smaller value of axis first
-                    switches ax0 and ax1 if necessary'''
+                    switches ax0 and ax1 if necessary"""
                     if ax[0]<ax[-1]:
                         xb=[bounds[0],bounds[-1]] # Extreme bounds 
                     else:
@@ -183,9 +183,9 @@ class DomainComponent(SelectorComponent):
                         lbound=tmp
                     b0=xb[0] # bounds of lower   value of the axis
                     b1=xb[1] # bounds of greater value of the axis
-                    ''' The folowing reset the values of the axis
+                    """ The folowing reset the values of the axis
                     sets it to the middle of the new cell
-                    also reset the bounds accordingly'''
+                    also reset the bounds accordingly"""
                     if not(b0[0]>fbound and b0[0]<lbound):
                         if not self.same(b0[0],fbound):  # make sure they are actually different not just very close
                             b0[0]=fbound
@@ -221,7 +221,7 @@ class DomainComponent(SelectorComponent):
         return a                        
                         
 def domain(*args, **kargs):
-    '''construct the selector'''
+    """construct the selector"""
     import cdms2 as cdms
     cdat_info.pingPCMDIdb("cdat","cdutil.region.domain")
     a=cdms.selectors.Selector(DomainComponent(*args,**kargs))

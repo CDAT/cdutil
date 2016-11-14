@@ -5,7 +5,8 @@
 import cdms2
 
 def writenetcdf (slab, filename, mode="a"):
-    """writenetcdf(slab, filename, mode="a") writes slab to the file.
+    """
+    writenetcdf(slab, filename, mode="a") writes slab to the file.
        modes: 'a'  append
               'w'  replace
               'r'  replace (for legacy code only, deprecated)

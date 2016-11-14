@@ -10,19 +10,26 @@ def reconstructPressureFromHybrid(ps, A, B, Po):
     """
     Reconstruct the Pressure field on sigma levels, from the surface pressure
 
-    Input
-    Ps   : Surface pressure
-    A,B,Po: Hybrid Convertion Coefficients, such as: p=B.ps+A.Po
-    Ps: surface pressure
-    B,A are 1D : sigma levels
-    Po and Ps must have same units
 
-    Output
-    Pressure field
-    Such as P=B*Ps+A*Po
+    :param Ps: Surface pressure
+    :param A: Hybrid Conversion Coefficient, such as: p=B.ps+A.Po.
+    :param B: Hybrid Conversion Coefficient, such as: p=B.ps+A.Po.
+    :param Po: Hybrid Conversion Coefficient, such as: p=B.ps+A.Po
+    :param Ps: surface pressure
 
-    Example
-    P=reconstructPressureFromHybrid(ps,A,B,Po)
+    .. note::
+
+        A and B are 1d sigma levels.
+        Po and Ps must have same units.
+
+
+    :returns: Pressure field, such as P=B*Ps+A*Po.
+
+    :Example:
+
+        .. doctest:: vertical_reconstructPressureFromHybrid
+
+            >>> P=reconstructPressureFromHybrid(ps,A,B,Po)
     """
     # Compute the pressure for the sigma levels
     cdat_info.pingPCMDIdb(
@@ -50,23 +57,35 @@ def linearInterpolation(
     A, I, levels=[100000, 92500, 85000, 70000, 60000, 50000, 40000,
                   30000, 25000, 20000, 15000, 10000, 7000, 5000, 3000, 2000, 1000], status=None, axis='z'):
     """
-    Linear interpolation
-    to interpolate a field from some levels to another set of levels
-    Value below "surface" are masked
+    Linear interpolation to interpolate a field from some levels to another set of levels
+    Values below "surface" are masked.
 
-    Input
-    A :      array to interpolate
-    I :      interpolation field (usually Pressure or depth) from TOP (level 0) to BOTTOM (last level), i.e P value going up with each level
-    levels : levels to interplate to (same units as I), default levels are:[100000, 92500, 85000, 70000, 60000, 50000, 40000, 30000, 25000, 20000, 15000, 10000, 7000, 5000, 3000, 2000, 1000]
-    axis:    axis over which to do the linear interpolation, default is 'z', accepted: '1' '(myaxis)'
 
-    I and levels must have same units
+    :param A: array to interpolate
+    :type A:
+    :param I: interpolation field (usually Pressure or depth) from TOP (level 0) to BOTTOM (last level)
+            i.e P value going up with each level.
+    :type I:
+    :param levels: levels to interpolate to (same units as I).
+                    Default levels:[100000, 92500, 85000, 70000, 60000, 50000, 40000,
+                        30000, 25000, 20000, 15000, 10000, 7000, 5000, 3000, 2000, 1000]
+    :type levels:
+    :param axis: Axis over which to do the linear interpolation.
+                Can provide either an int representing axis index, or the axis name.
+                Default: 'z'.
+    :type axis: str or int
 
-    Output
-    array on new levels (levels)
+    .. note::
 
-    Examples:
-    A=interpolate(A,I,levels=[100000, 92500, 85000, 70000, 60000, 50000, 40000, 30000, 25000, 20000, 15000, 10000, 7000, 5000, 3000, 2000, 1000])
+        I and levels must have same units
+
+    :returns: array on new levels (levels)
+
+    :Examples:
+
+        .. doctest:: vertical_linearInterpolation
+
+            >>> A=interpolate(A,I) # interpolates A over default levels
     """
 
     cdat_info.pingPCMDIdb("cdat", "cdutil.vertical.linearInterpolation")
@@ -154,23 +173,29 @@ def logLinearInterpolation(
     A, P, levels=[100000, 92500, 85000, 70000, 60000, 50000, 40000,
                   30000, 25000, 20000, 15000, 10000, 7000, 5000, 3000, 2000, 1000], status=None, axis='z'):
     """
-    Log-linear interpolation
-    to convert a field from sigma levels to pressure levels
-    Value below surface are masked
+    Log-linear interpolation to convert a field from sigma levels to pressure levels.
+    Values below surface are masked.
 
-    Input
-    A :      array on sigma levels
-    P :      pressure field from TOP (level 0) to BOTTOM (last level)
-    levels : pressure levels to interplate to (same units as P), default levels are:[100000, 92500, 85000, 70000, 60000, 50000, 40000, 30000, 25000, 20000, 15000, 10000, 7000, 5000, 3000, 2000, 1000]
-    axis:    axis over which to do the linear interpolation, default is 'z', accepted: '1' '(myaxis)'
+    :param A:      array on sigma levels
+    :type A:
+    :param P:      pressure field from TOP (level 0) to BOTTOM (last level)
+    :type P:
+    :param levels: pressure levels to interplate to (same units as P), default levels are:[100000, 92500, 85000, 70000, 60000, 50000, 40000, 30000, 25000, 20000, 15000, 10000, 7000, 5000, 3000, 2000, 1000]
+    :type levels:
+    :param axis:    axis over which to do the linear interpolation, default is 'z', accepted: '1' '(myaxis)'
+    :type axis:
 
-    P and levels must have same units
+    .. note::
 
-    Output
-    array on pressure levels (levels)
+        P and levels must have same units
 
-    Examples:
-    A=logLinearInterpolation(A,P),levels=[100000, 92500, 85000, 70000, 60000, 50000, 40000, 30000, 25000, 20000, 15000, 10000, 7000, 5000, 3000, 2000, 1000])
+    :returns: array on pressure levels (levels)
+
+    :Example:
+
+        .. doctest:: vertical_logLinearInterpolation
+
+            >>> A=logLinearInterpolation(A,P) # interpolate A using pressure field P over the default levels
     """
 
     cdat_info.pingPCMDIdb("cdat", "cdutil.vertical.logLinearInterpolation")
