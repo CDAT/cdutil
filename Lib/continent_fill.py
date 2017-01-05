@@ -5,6 +5,9 @@ import sys,string,vcs,cdms2 as cdms,copy,numpy
 
 
 class Gcf:
+    """
+    Continent fill class
+    """
     def __init__(self):
         self.name='default'
         self.g_name='Gcf'

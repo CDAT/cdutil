@@ -1,0 +1,269 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>vertical &#8212; CDUtil 2.8 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '2.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="prev" title="ValidationFunctions" href="ValidationFunctions.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-cdutil.vertical">
+<span id="vertical"></span><h1>vertical<a class="headerlink" href="#module-cdutil.vertical" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="cdutil.vertical.linearInterpolation">
+<code class="descclassname">cdutil.vertical.</code><code class="descname">linearInterpolation</code><span class="sig-paren">(</span><em>A, I, levels=[100000, 92500, 85000, 70000, 60000, 50000, 40000, 30000, 25000, 20000, 15000, 10000, 7000, 5000, 3000, 2000, 1000], status=None, axis='z'</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cdutil/vertical.html#linearInterpolation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cdutil.vertical.linearInterpolation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linear interpolation to interpolate a field from some levels to another set of levels
+Values below &#8220;surface&#8221; are masked.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>A</strong> &#8211; array to interpolate</li>
+<li><strong>I</strong> &#8211; interpolation field (usually Pressure or depth) from TOP (level 0) to BOTTOM (last level)
+i.e P value going up with each level.</li>
+<li><strong>levels</strong> &#8211; <p>levels to interpolate to (same units as I).
+Default levels:[100000, 92500, 85000, 70000, 60000, 50000, 40000,</p>
+<blockquote>
+<div>30000, 25000, 20000, 15000, 10000, 7000, 5000, 3000, 2000, 1000]</div></blockquote>
+</li>
+<li><strong>axis</strong> (<em>str</em><em> or </em><em>int</em>) &#8211; Axis over which to do the linear interpolation.
+Can provide either an int representing axis index, or the axis name.
+Default: &#8216;z&#8217;.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">I and levels must have same units</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">array on new levels (levels)</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Examples:</th><td class="field-body"><div class="first last highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">A</span><span class="o">=</span><span class="n">interpolate</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">I</span><span class="p">)</span> <span class="c1"># interpolates A over default levels</span>
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="cdutil.vertical.logLinearInterpolation">
+<code class="descclassname">cdutil.vertical.</code><code class="descname">logLinearInterpolation</code><span class="sig-paren">(</span><em>A, P, levels=[100000, 92500, 85000, 70000, 60000, 50000, 40000, 30000, 25000, 20000, 15000, 10000, 7000, 5000, 3000, 2000, 1000], status=None, axis='z'</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cdutil/vertical.html#logLinearInterpolation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cdutil.vertical.logLinearInterpolation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log-linear interpolation to convert a field from sigma levels to pressure levels.
+Values below surface are masked.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>A</strong> &#8211; array on sigma levels</li>
+<li><strong>P</strong> &#8211; pressure field from TOP (level 0) to BOTTOM (last level)</li>
+<li><strong>levels</strong> (<em>list</em>) &#8211; pressure levels to interplate to (same units as P), default levels are:
+[100000, 92500, 85000, 70000, 60000, 50000, 40000, 30000, 25000, 20000, 15000, 10000, 7000, 5000,
+3000, 2000, 1000]</li>
+<li><strong>axis</strong> (<em>str</em>) &#8211; axis over which to do the linear interpolation</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">P and levels must have same units</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">array on pressure levels (levels)</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Example:</th><td class="field-body"><div class="first last highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">A</span><span class="o">=</span><span class="n">logLinearInterpolation</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">P</span><span class="p">)</span> <span class="c1"># interpolate A using pressure field P over the default levels</span>
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="cdutil.vertical.reconstructPressureFromHybrid">
+<code class="descclassname">cdutil.vertical.</code><code class="descname">reconstructPressureFromHybrid</code><span class="sig-paren">(</span><em>ps</em>, <em>A</em>, <em>B</em>, <em>Po</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cdutil/vertical.html#reconstructPressureFromHybrid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cdutil.vertical.reconstructPressureFromHybrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reconstruct the Pressure field on sigma levels, from the surface pressure</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>Ps</strong> &#8211; Surface pressure</li>
+<li><strong>A</strong> &#8211; Hybrid Conversion Coefficient, such as: p=B.ps+A.Po.</li>
+<li><strong>B</strong> &#8211; Hybrid Conversion Coefficient, such as: p=B.ps+A.Po.</li>
+<li><strong>Po</strong> &#8211; Hybrid Conversion Coefficient, such as: p=B.ps+A.Po</li>
+<li><strong>Ps</strong> &#8211; surface pressure</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">A and B are 1d sigma levels.
+Po and Ps must have same units.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Pressure field, such as P=B*Ps+A*Po.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Example:</th><td class="field-body"><div class="first last highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">P</span><span class="o">=</span><span class="n">reconstructPressureFromHybrid</span><span class="p">(</span><span class="n">ps</span><span class="p">,</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="n">Po</span><span class="p">)</span>
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="cdutil.vertical.sigma2Pressure">
+<code class="descclassname">cdutil.vertical.</code><code class="descname">sigma2Pressure</code><span class="sig-paren">(</span><em>A, P, levels=[100000, 92500, 85000, 70000, 60000, 50000, 40000, 30000, 25000, 20000, 15000, 10000, 7000, 5000, 3000, 2000, 1000], status=None, axis='z'</em><span class="sig-paren">)</span><a class="headerlink" href="#cdutil.vertical.sigma2Pressure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log-linear interpolation to convert a field from sigma levels to pressure levels.
+Values below surface are masked.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>A</strong> &#8211; array on sigma levels</li>
+<li><strong>P</strong> &#8211; pressure field from TOP (level 0) to BOTTOM (last level)</li>
+<li><strong>levels</strong> (<em>list</em>) &#8211; pressure levels to interplate to (same units as P), default levels are:
+[100000, 92500, 85000, 70000, 60000, 50000, 40000, 30000, 25000, 20000, 15000, 10000, 7000, 5000,
+3000, 2000, 1000]</li>
+<li><strong>axis</strong> (<em>str</em>) &#8211; axis over which to do the linear interpolation</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">P and levels must have same units</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">array on pressure levels (levels)</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Example:</th><td class="field-body"><div class="first last highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">A</span><span class="o">=</span><span class="n">logLinearInterpolation</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">P</span><span class="p">)</span> <span class="c1"># interpolate A using pressure field P over the default levels</span>
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../cdutil.html">CDUtil</a><ul>
+      <li>Previous: <a href="ValidationFunctions.html" title="previous chapter">ValidationFunctions</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/CDUtil/Modules/vertical.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Charles Doutriaux.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../../_sources/CDUtil/Modules/vertical.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

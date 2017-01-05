@@ -187,7 +187,8 @@ class GridAxis(object):
     
 
 class WeightedGridMaker(object):
-    """The WeightedGridMaker generates a cdms grid object (see cdms documentation for a description)
+    """
+    The WeightedGridMaker generates a cdms grid object (see cdms documentation for a description)
     and may also associate a WeightsMaker object with that grid.  The WeightedGridMaker object may be used by the
     VariableConditioner object to define a "target" grid to which the variable will be mapped.
     The WeightedGridMaker must be either provided with a cdms grid object or with information needed to generate a grid.
@@ -710,7 +711,8 @@ class VariablesMatcher(object):
                 variable 1 and variable 2 should be mapped as a last step.
 
                 .. note::
-                    If a WeightsMaker is associated with the WeightedGridMaker object,
+
+                    If a :py:class:`WeightsMaker` is associated with the :py:class:`WeightedGridMaker` object,
                     then the mask will be applied to the data after regridding.
         :type weightedGridMaker: :py:class:`WeightedGridMaker`
 

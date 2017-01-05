@@ -1,0 +1,655 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>times &#8212; CDUtil 2.8 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '2.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="ValidationFunctions" href="ValidationFunctions.html" />
+    <link rel="prev" title="sftbyrgn" href="sftbyrgn.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-cdutil.times">
+<span id="times"></span><h1>times<a class="headerlink" href="#module-cdutil.times" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="cdutil.times.TimeSlicer">
+<em class="property">class </em><code class="descclassname">cdutil.times.</code><code class="descname">TimeSlicer</code><span class="sig-paren">(</span><em>slicerfunction=None</em>, <em>criteriafunction=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cdutil/times.html#TimeSlicer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cdutil.times.TimeSlicer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Author : Charles Doutriaux: <a class="reference external" href="mailto:doutriaux1&#37;&#52;&#48;llnl&#46;gov">doutriaux1<span>&#64;</span>llnl<span>&#46;</span>gov</a>
+Date: April 2001</p>
+<p>Returns masked average of specific time slices
+&#8220;slicer&#8221; determine which slices of the Transient Variable (TV) are processed
+&#8220;criteria&#8221; gets TV (with time dimension) and returns a &#8220;timeless&#8221; mask, used to mask the averaged slices</p>
+<dl class="docutils">
+<dt>&#8220;slicer&#8221;</dt>
+<dd><dl class="first last docutils">
+<dt>Input:</dt>
+<dd><ul class="first last simple">
+<li>Time Axis</li>
+<li>User argument (can be anything) (in a list if more than one argument)</li>
+</ul>
+</dd>
+<dt>Output:</dt>
+<dd><dl class="first last docutils">
+<dt>indices</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">the indices for each season:</span><dd>[[i1,i2,...,il],
+[j1,j2,...,jm],
+...,
+[k1,k2,...kn]]</dd>
+<dt>bounds</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">the bounds covered by each slice for each season:</span><dd>[[[i1b1,i1b2],[i2b1,i2b2],...,[ilb1,ilb2]],
+[[[j1b1,j1b2],[j2b1,j2b2],...,[jmb1,jmb2]],
+...,
+[[k1b1,k1b2],[k2b1,k2b2],...,[knb1,knb2]]]</dd>
+<dt>norm</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">the actual length of each &#8220;season&#8221;, and its start</span><dd>[[Li,Si],
+[Lj,Sj],
+...,
+[Lk,Sk]]</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+<dt>&#8220;criteria&#8221;</dt>
+<dd><dl class="first last docutils">
+<dt>Input:</dt>
+<dd><ul class="first last">
+<li><p class="first">slab : a slab</p>
+</li>
+<li><dl class="first docutils">
+<dt>mask:  the actual percentage of data in each subset used to produce the slab</dt>
+<dd><p class="first last">the bounds of its first (time) dimension must be correct
+they will be used by centroid</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">spread: the begining and end time of the slice processed</p>
+</li>
+<li><p class="first">User argument (can be anything)</p>
+</li>
+</ul>
+</dd>
+<dt>Output:</dt>
+<dd><ul class="first last simple">
+<li>the slab, masked</li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>Once constructed the object, beside &#8220;slicer&#8221; and &#8220;criteria&#8221; has 3 functions:</p>
+<dl class="docutils">
+<dt>&#8220;get&#8221;</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">which returns the slices wanted, appropriately masked</span><dd><dl class="first last docutils">
+<dt>Input:</dt>
+<dd>slab : the slab on which to operate
+sliceruserargument  : anything your slicer function needs, default is None
+criteriauserargument: anything your criteria function needs, default is None</dd>
+<dt>Output:</dt>
+<dd>out  : averaged and masked slices of slab</dd>
+</dl>
+</dd>
+<dt>&#8220;departures&#8221;</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">which returns the departures of slab from the result of get</span><dd><dl class="first last docutils">
+<dt>Input:</dt>
+<dd>slab                : slab from which the we want to get the departure
+sliceruserargument  : anything your slicer function needs, default is None
+criteriauserargument: anything your criteria function needs, default is None
+(ref): optional     : result from get or equivalent precomputed</dd>
+<dt>Output:</dt>
+<dd>out : departure of slab from ref</dd>
+</dl>
+</dd>
+<dt>&#8220;average&#8221;</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">which return the average of the result of get</span><dd><dl class="first last docutils">
+<dt>Input:</dt>
+<dd>slab                : the slab on which to operate
+slices              : the slices for each part
+bounds              : the length of each slice
+norm                : the actual length of each &#8220;season&#8221;
+criteriaarg         : arguments for criteria thing</dd>
+<dt>Output:</dt>
+<dd>out : the average of slab, masked by criteria</dd>
+</dl>
+</dd>
+</dl>
+<p>Example of construction:
+TS=TimeSlicer(slicerfunc,criteriafunc)
+myres=TS(myslab,[[slicerarg,[criteriaarg]])
+myresdeparture=TS(myslab,[[slicerarg,[criteriaarg,ref]]]</p>
+<dl class="method">
+<dt id="cdutil.times.TimeSlicer.average">
+<code class="descname">average</code><span class="sig-paren">(</span><em>slab</em>, <em>slices</em>, <em>bounds</em>, <em>norm</em>, <em>criteriaarg=None</em>, <em>statusbar=None</em>, <em>weights=False</em>, <em>sum=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cdutil/times.html#TimeSlicer.average"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cdutil.times.TimeSlicer.average" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the average of the result of slicer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>slab</strong> &#8211; the slab on which to operate</li>
+<li><strong>slices</strong> &#8211; the slices for each part</li>
+<li><strong>bounds</strong> &#8211; the length of each slice</li>
+<li><strong>norm</strong> &#8211; the actual length of each &#8220;season&#8221;</li>
+<li><strong>criteriaarg</strong> &#8211; arguments for criteria thing</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the average of slab, masked by criteria</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cdutil.times.TimeSlicer.departures">
+<code class="descname">departures</code><span class="sig-paren">(</span><em>slab</em>, <em>slicerarg=None</em>, <em>criteriaarg=None</em>, <em>ref=None</em>, <em>statusbar=None</em>, <em>sum=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cdutil/times.html#TimeSlicer.departures"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cdutil.times.TimeSlicer.departures" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>slab</strong> &#8211; slab from which the we want to get the departure</li>
+<li><strong>slicerarg</strong> &#8211; anything your slicer function needs, default is None</li>
+<li><strong>criteriaarg</strong> &#8211; anything your criteria function needs, default is None</li>
+<li><strong>ref</strong> &#8211; result from get or equivalent precomputed</li>
+<li><strong>statusbar</strong> &#8211; see <code class="xref py py-func docutils literal"><span class="pre">statusbar()</span></code> for details</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The departures of slab from the result of get</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cdutil.times.TimeSlicer.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>slab</em>, <em>slicerarg=None</em>, <em>criteriaarg=None</em>, <em>statusbar=None</em>, <em>weights=False</em>, <em>sum=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cdutil/times.html#TimeSlicer.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cdutil.times.TimeSlicer.get" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>slab</strong> &#8211; the slab on which to operate</li>
+<li><strong>slicerarg</strong> &#8211; anything your slicer function needs, default is None</li>
+<li><strong>criteriaarg</strong> &#8211; anything your criteria function needs, default is None</li>
+<li><strong>statusbar</strong> &#8211; see <code class="xref py py-func docutils literal"><span class="pre">statusbar()</span></code> for details</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">averaged and masked slices of slab</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="cdutil.times.centroid">
+<code class="descclassname">cdutil.times.</code><code class="descname">centroid</code><span class="sig-paren">(</span><em>msk</em>, <em>bounds</em>, <em>coords=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cdutil/times.html#centroid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cdutil.times.centroid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the centroid of a bunch of points.
+Authors: Charles Doutriaux/Karl Taylor
+Date: April 2001
+:param msk: A slab (cdms2 TransientVariable)
+:type msk: cdms2.tvariable.TransientVariable</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>bounds</strong> &#8211; The bounds of the overall thing.</td>
+</tr>
+</tbody>
+</table>
+<p>:param coords : The coordinates spanned by each subset</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A slab representing the centroid.  Values are between 0 (data evenly distributed evenly across the center)
+and +/-1 (data not evenly distributed). Centroid is 1D less than msk</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="cdutil.times.cyclicalcentroid">
+<code class="descclassname">cdutil.times.</code><code class="descname">cyclicalcentroid</code><span class="sig-paren">(</span><em>s</em>, <em>bounds</em>, <em>coords=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cdutil/times.html#cyclicalcentroid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cdutil.times.cyclicalcentroid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the centroid, but this assumes cyclical axis.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><div class="first highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">cdms2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">vcs</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vcs</span><span class="o">.</span><span class="n">download_sample_data_files</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">=</span><span class="n">cdms2</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">vcs</span><span class="o">.</span><span class="n">sampledata</span> <span class="o">+</span> <span class="s1">&#39;/clt.nc&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">=</span><span class="n">f</span><span class="p">(</span><span class="s1">&#39;clt&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cyclecentroid</span><span class="o">=</span><span class="n">cyclicalcentroid</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">bounds</span><span class="p">)</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>s</strong> (<em>cdms2.tvariable.TransientVariable</em>) &#8211; A slab (cdms2 TransientVariable)</li>
+<li><strong>bounds</strong> &#8211; The bounds of the overall thing</li>
+<li><strong>coords</strong> &#8211; The coordinates spanned by each subset</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A slab representing the cyclecentroid, which is the same shape as s but without the 1st dimension</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">cdms2.tvariable.TransientVariable</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="cdutil.times.dayBasedSlicer">
+<code class="descclassname">cdutil.times.</code><code class="descname">dayBasedSlicer</code><span class="sig-paren">(</span><em>tim</em>, <em>arg=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cdutil/times.html#dayBasedSlicer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cdutil.times.dayBasedSlicer" title="Permalink to this definition">¶</a></dt>
+<dd><p>slicer function for the TimeSlicer class
+select days
+Author : Charles Doutriaux, <a class="reference external" href="mailto:doutriaux1&#37;&#52;&#48;llnl&#46;gov">doutriaux1<span>&#64;</span>llnl<span>&#46;</span>gov</a>
+Original Date: June, 2003</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>tim</strong> &#8211; time axis</li>
+<li><strong>arg</strong> (<em>str</em>) &#8211; string representing the desired day/days or day number(s) (jan 1st, is day 0, feb 29th is day 59.5...)
+day are represented as &#8220;Jan-01&#8221; &#8220;January-01&#8221; &#8220;jan-1&#8221;, &#8220;1-january&#8221;, case does not matter
+days can be represented by 2 numbers but then month is assumed to be first ! e.g &#8220;01-25&#8221; = &#8220;jan-25&#8221;
+you can mix definitions</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="docutils">
+<dt>Output:</dt>
+<dd><ul class="first last simple">
+<li></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="cdutil.times.generalCriteria">
+<code class="descclassname">cdutil.times.</code><code class="descname">generalCriteria</code><span class="sig-paren">(</span><em>slab</em>, <em>mask</em>, <em>spread</em>, <em>arg</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cdutil/times.html#generalCriteria"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cdutil.times.generalCriteria" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Default Conditions:</dt>
+<dd>50% of the data
+AND
+Centroid &lt; x (in absolute value), centroid is always between 0 (perfect) and 1, (not perfect)
+by default centroid is not used</dd>
+</dl>
+<p>Author: Charles Doutriaux, <a class="reference external" href="mailto:doutriaux1&#37;&#52;&#48;llnl&#46;gov">doutriaux1<span>&#64;</span>llnl<span>&#46;</span>gov</a></p>
+<dl class="docutils">
+<dt>Usage:</dt>
+<dd>generalCriteria(slab,sliced,slices,arg)</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>slab</strong> &#8211; the original slab</li>
+<li><strong>mask</strong> &#8211; the actual percentage of data in each subset used to produce the slab
+the bounds of its first (time) dimension must be correct
+they will be used by centroid</li>
+<li><strong>spread</strong> &#8211; the begining and end time of the slice processed</li>
+<li><strong>arg</strong> &#8211; A list of arguments
+First represent the % of value present to retain a slice
+Second represent the value of the centroid (between 0: perfect and 1: bad
+If you do not want to use one these criteria pass None
+if you would rather use a cyclicalcnetroid pass: &#8220;cyclical&#8221; as an extra argument</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="cdutil.times.getMonthIndex">
+<code class="descclassname">cdutil.times.</code><code class="descname">getMonthIndex</code><span class="sig-paren">(</span><em>my_str</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cdutil/times.html#getMonthIndex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cdutil.times.getMonthIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a string representing a month or a season (common abrev)
+Returns the ordered indices of the month.
+Author: Krishna Achutarao
+Date: April 2001</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>my_str</strong> (<em>str</em>) &#8211; string reperesenting month or season</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The ordered indices of the month</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="cdutil.times.getMonthString">
+<code class="descclassname">cdutil.times.</code><code class="descname">getMonthString</code><span class="sig-paren">(</span><em>my_list</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cdutil/times.html#getMonthString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cdutil.times.getMonthString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a list of months creates the string representing the sequence</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="cdutil.times.insert_monthly_seasons">
+<code class="descclassname">cdutil.times.</code><code class="descname">insert_monthly_seasons</code><span class="sig-paren">(</span><em>data</em>, <em>seasons</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cdutil/times.html#insert_monthly_seasons"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cdutil.times.insert_monthly_seasons" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes data assumed to be in monthly increments (1,2,3,etc...)
+And tries to add seasons into it is actually missing
+For this takes each time step, and see if a number of &#8220;season&#8221; could be inserted between these two</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="cdutil.times.isMonthly">
+<code class="descclassname">cdutil.times.</code><code class="descname">isMonthly</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cdutil/times.html#isMonthly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cdutil.times.isMonthly" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function test if the data are monthly data from the time axis.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>s</strong> (<em>cdms2.tvariable.TransientVariable</em>) &#8211; A cdms2 TransientVariable</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">An integer flag indicating whether s has monthly data (1), or does not (0).</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="cdutil.times.mergeTime">
+<code class="descclassname">cdutil.times.</code><code class="descname">mergeTime</code><span class="sig-paren">(</span><em>ds</em>, <em>statusbar=1</em>, <em>fill_value=1e+20</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cdutil/times.html#mergeTime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cdutil.times.mergeTime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merge chronologically a bunch of slabs
+Version 1.0
+Author: Charles Doutriaux, <a class="reference external" href="mailto:doutriaux1&#37;&#52;&#48;llnl&#46;gov">doutriaux1<span>&#64;</span>llnl<span>&#46;</span>gov</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><div class="first highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">cdms2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">vcs</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vcs</span><span class="o">.</span><span class="n">download_sample_data_files</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">=</span><span class="n">cdms2</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">vcs</span><span class="o">.</span><span class="n">sampledata</span> <span class="o">+</span> <span class="s1">&#39;/clt.nc&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">clt</span><span class="o">=</span><span class="n">f</span><span class="p">(</span><span class="s1">&#39;clt&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">u</span><span class="o">=</span><span class="n">f</span><span class="p">(</span><span class="s1">&#39;u&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">v</span><span class="o">=</span><span class="n">f</span><span class="p">(</span><span class="s1">&#39;v&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">=</span><span class="p">[</span><span class="n">clt</span><span class="p">,</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mymerged</span><span class="o">=</span><span class="n">mergeTime</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ds</strong> (<em>list</em>) &#8211; A list or an array of slabs to merge. Each slab MUST be in chronological order.</li>
+<li><strong>statusbar</strong> (<em>int</em>) &#8211; Integer flag indicating whether to show status bar or not.</li>
+<li><strong>fill_value</strong> (<em>float</em>) &#8211; Float used to set the fill value of the generated slab.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A slab merging all the slabs of ds. Order is the order of the first slab</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">cdms2.tvariable.TransientVariable</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="cdutil.times.monthBasedSlicer">
+<code class="descclassname">cdutil.times.</code><code class="descname">monthBasedSlicer</code><span class="sig-paren">(</span><em>tim</em>, <em>arg=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cdutil/times.html#monthBasedSlicer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cdutil.times.monthBasedSlicer" title="Permalink to this definition">¶</a></dt>
+<dd><p>slicer function for the TimeSlicer class
+select months
+Author : Charles Doutriaux, <a class="reference external" href="mailto:doutriaux1&#37;&#52;&#48;llnl&#46;gov">doutriaux1<span>&#64;</span>llnl<span>&#46;</span>gov</a>
+Original Date: April 2001
+Last Modified: October, 2001
+Input:
+:param tim: time axis
+:param arg: character string representing the desired month/season or integer(s)</p>
+<blockquote>
+<div>also you can pass a list of the months you want (string or integer)
+you can mix integer and strings</div></blockquote>
+<dl class="docutils">
+<dt>Output:</dt>
+<dd><ul class="first last simple">
+<li></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="cdutil.times.setAxisTimeBoundsDaily">
+<code class="descclassname">cdutil.times.</code><code class="descname">setAxisTimeBoundsDaily</code><span class="sig-paren">(</span><em>axis</em>, <em>frequency=1</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cdutil/times.html#setAxisTimeBoundsDaily"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cdutil.times.setAxisTimeBoundsDaily" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the bounds correctly for the time axis (beginning to end of day)
+Usage:
+tim=s.getTime()
+cdutil.times.setAxisTimeBoundsMonthly(tim,frequency=1)
+e.g. for twice-daily data use frequency=2</p>
+<blockquote>
+<div>for 6 hourly data use frequency=4
+for   hourly data use frequency=24</div></blockquote>
+<p>Origin of day is always midnight</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="cdutil.times.setAxisTimeBoundsMonthly">
+<code class="descclassname">cdutil.times.</code><code class="descname">setAxisTimeBoundsMonthly</code><span class="sig-paren">(</span><em>axis</em>, <em>stored=0</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cdutil/times.html#setAxisTimeBoundsMonthly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cdutil.times.setAxisTimeBoundsMonthly" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the bounds correctly for the time axis (beginning to end of month)
+Set stored to 1 to indicate that your data are stored at the end of the month
+Usage:
+tim=s.getTime()
+cdutil.times.setAxisTimeBoundsMonthly(tim,stored=0)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="cdutil.times.setAxisTimeBoundsYearly">
+<code class="descclassname">cdutil.times.</code><code class="descname">setAxisTimeBoundsYearly</code><span class="sig-paren">(</span><em>axis</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cdutil/times.html#setAxisTimeBoundsYearly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cdutil.times.setAxisTimeBoundsYearly" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the bounds correctly for the time axis (beginning to end of year)
+Usage:
+tim=s.getTime()
+cdutil.times.setAxisTimeBoundsYearly(tim)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="cdutil.times.setSlabTimeBoundsDaily">
+<code class="descclassname">cdutil.times.</code><code class="descname">setSlabTimeBoundsDaily</code><span class="sig-paren">(</span><em>slab</em>, <em>frequency=1</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cdutil/times.html#setSlabTimeBoundsDaily"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cdutil.times.setSlabTimeBoundsDaily" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the bounds correctly for the time axis (beginning to end of day)
+for &#8216;frequency&#8217;-daily data
+Usage:
+cdutil.times.setSlabTimeBoundsDaily(slab,frequency=1)
+e.g. for twice-daily data use frequency=2</p>
+<blockquote>
+<div>for 6 hourly data use frequency=4
+for   hourly data use frequency=24</div></blockquote>
+<p>Origin of day is always midnight</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="cdutil.times.setSlabTimeBoundsMonthly">
+<code class="descclassname">cdutil.times.</code><code class="descname">setSlabTimeBoundsMonthly</code><span class="sig-paren">(</span><em>slab</em>, <em>stored=0</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cdutil/times.html#setSlabTimeBoundsMonthly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cdutil.times.setSlabTimeBoundsMonthly" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the bounds correctly for the time axis for monthly data stored
+without bounds.
+Set stored to 1 to indicate that your data are stored at the end of the month
+Usage:
+cdutil.times.setSlabTimeBoundsMonthly(slab,stored=0)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="cdutil.times.setSlabTimeBoundsYearly">
+<code class="descclassname">cdutil.times.</code><code class="descname">setSlabTimeBoundsYearly</code><span class="sig-paren">(</span><em>slab</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cdutil/times.html#setSlabTimeBoundsYearly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cdutil.times.setSlabTimeBoundsYearly" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the bounds correctly for the time axis for yearly data
+Usage:
+cdutil.times.setSlabTimeBoundsYearly(slab)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="cdutil.times.setTimeBoundsDaily">
+<code class="descclassname">cdutil.times.</code><code class="descname">setTimeBoundsDaily</code><span class="sig-paren">(</span><em>obj</em>, <em>frequency=1</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cdutil/times.html#setTimeBoundsDaily"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cdutil.times.setTimeBoundsDaily" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the bounds correctly for the time axis (beginning to end of day)
+for &#8216;frequency&#8217;-daily data
+Usage:
+cdutil.times.setSlabTimeBoundsDaily(slab,frequency=1)
+or
+cdutil.times.setSlabTimeBoundsDaily(time_axis,frequency=1)
+e.g. for twice-daily data use frequency=2</p>
+<blockquote>
+<div>for 6 hourly data use frequency=4
+for   hourly data use frequency=24</div></blockquote>
+<p>Origin of day is always midnight</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="cdutil.times.setTimeBoundsMonthly">
+<code class="descclassname">cdutil.times.</code><code class="descname">setTimeBoundsMonthly</code><span class="sig-paren">(</span><em>obj</em>, <em>stored=0</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cdutil/times.html#setTimeBoundsMonthly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cdutil.times.setTimeBoundsMonthly" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the bounds correctly for the time axis (beginning to end of month)
+Set stored to 1 to indicate that your data are stored at the end of the month
+Usage:
+tim=s.getTime()
+cdutil.times.setAxisTimeBoundsMonthly(s,stored=0)
+or
+cdutil.times.setAxisTimeBoundsMonthly(tim,stored=0)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="cdutil.times.setTimeBoundsYearly">
+<code class="descclassname">cdutil.times.</code><code class="descname">setTimeBoundsYearly</code><span class="sig-paren">(</span><em>obj</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cdutil/times.html#setTimeBoundsYearly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cdutil.times.setTimeBoundsYearly" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the bounds correctly for the time axis for yearly data
+Usage:
+cdutil.times.setSlabTimeBoundsYearly(slab)
+or
+cdutil.times.setSlabTimeBoundsYearly(time_axis)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="cdutil.times.switchCalendars">
+<code class="descclassname">cdutil.times.</code><code class="descname">switchCalendars</code><span class="sig-paren">(</span><em>t1</em>, <em>u1</em>, <em>c1</em>, <em>u2</em>, <em>c2=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cdutil/times.html#switchCalendars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cdutil.times.switchCalendars" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a relative time from one calendar to another, assuming that they are in different calendars</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"><div class="first highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">switchCalendars</span><span class="p">(</span><span class="n">t1</span><span class="p">,</span><span class="n">c1</span><span class="p">,</span><span class="n">u2</span><span class="p">,</span><span class="n">c2</span><span class="p">)</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>t1</strong> &#8211; A cdtime reltime object or a value. If it is a value, then u1 is needed.</li>
+<li><strong>c1</strong> &#8211; cdtime calendar</li>
+<li><strong>c2</strong> &#8211; cdtime calendar</li>
+<li><strong>u1</strong> &#8211; units in the calendar to be converted</li>
+<li><strong>u2</strong> &#8211; units in the final calendar</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../cdutil.html">CDUtil</a><ul>
+      <li>Previous: <a href="sftbyrgn.html" title="previous chapter">sftbyrgn</a></li>
+      <li>Next: <a href="ValidationFunctions.html" title="next chapter">ValidationFunctions</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/CDUtil/Modules/times.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Charles Doutriaux.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../../_sources/CDUtil/Modules/times.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

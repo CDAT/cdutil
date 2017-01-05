@@ -1,0 +1,5 @@
+CDUtil
+------
+
+.. automodule:: cdutil
+    :members:

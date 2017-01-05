@@ -1,0 +1,280 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>cdutil.sftbyrgn &#8212; CDUtil 2.8 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '2.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for cdutil.sftbyrgn</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Adapted for numpy/ma/cdms2 by convertcdms.py</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module contains functions to map an array of &quot;regions&quot; onto a mask</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">regrid2</span><span class="o">,</span><span class="nn">cdutil</span><span class="o">,</span><span class="nn">MV2</span><span class="o">,</span><span class="nn">genutil</span><span class="o">,</span><span class="nn">cdms2</span><span class="o">,</span><span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">cdat_info</span>
+
+
+<span class="k">def</span> <span class="nf">sumregions</span><span class="p">(</span><span class="n">potential_reg</span><span class="p">,</span><span class="n">potential</span><span class="p">):</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">potential_reg</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mf">1.</span>
+    <span class="n">wts</span> <span class="o">=</span> <span class="n">potential</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mf">1.</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">potential</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="n">c</span>   <span class="o">=</span> <span class="n">MV2</span><span class="o">.</span><span class="n">greater</span><span class="p">(</span><span class="n">potential</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">wts</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">MV2</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">potential_reg</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">out</span><span class="p">)</span>
+        <span class="n">wts</span> <span class="o">=</span> <span class="n">MV2</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">potential</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">wts</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+
+<span class="k">def</span> <span class="nf">loop</span><span class="p">(</span><span class="n">potential</span><span class="p">,</span><span class="n">potential_reg</span><span class="p">,</span><span class="n">c2</span><span class="p">,</span><span class="n">w3</span><span class="p">,</span><span class="n">region</span><span class="p">):</span>
+    <span class="n">nmax</span>        <span class="o">=</span> <span class="n">potential</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">c3</span>          <span class="o">=</span> <span class="n">MV2</span><span class="o">.</span><span class="n">not_equal</span><span class="p">(</span><span class="n">w3</span><span class="p">,</span><span class="mf">0.</span><span class="p">)</span>
+    <span class="n">c</span>           <span class="o">=</span> <span class="n">MV2</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span><span class="n">c3</span><span class="p">)</span>
+    <span class="n">thisturn</span>    <span class="o">=</span> <span class="n">MV2</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nmax</span><span class="p">):</span>
+        <span class="n">c1</span>                  <span class="o">=</span> <span class="n">MV2</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span><span class="n">MV2</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">potential_reg</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">region</span><span class="p">),</span><span class="n">MV2</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">potential</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="o">-</span><span class="mi">999</span><span class="p">))</span>
+        <span class="n">c2</span>                  <span class="o">=</span> <span class="n">MV2</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">c1</span><span class="p">)</span>
+        <span class="n">c2</span>                  <span class="o">=</span> <span class="n">MV2</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span><span class="n">thisturn</span><span class="p">)</span>
+        <span class="n">potential_reg</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>    <span class="o">=</span> <span class="n">MV2</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span><span class="n">region</span><span class="p">,</span><span class="n">potential_reg</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">thisturn</span>            <span class="o">=</span> <span class="n">MV2</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">thisturn</span><span class="p">)</span>
+        <span class="n">c1</span>                  <span class="o">=</span> <span class="n">MV2</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span><span class="n">MV2</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">potential</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="o">-</span><span class="mi">999</span><span class="p">))</span>
+        <span class="n">c2</span>                  <span class="o">=</span> <span class="n">MV2</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span><span class="n">MV2</span><span class="o">.</span><span class="n">not_equal</span><span class="p">(</span><span class="n">potential</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="o">-</span><span class="mi">999</span><span class="p">))</span>
+        <span class="n">potential</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>        <span class="o">=</span> <span class="n">MV2</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span><span class="n">w3</span><span class="p">,</span><span class="n">potential</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">potential</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>        <span class="o">=</span> <span class="n">MV2</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span><span class="n">potential</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="n">w3</span><span class="p">,</span><span class="n">potential</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="c1">## Ultimate test to see if more would be needed !</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">MV2</span><span class="o">.</span><span class="n">allequal</span><span class="p">(</span><span class="n">MV2</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">thisturn</span><span class="p">),</span><span class="mi">0</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="s1">&#39;OOOPS WE COULD USE MORE REGIONS BUDDY !&#39;</span>
+    <span class="k">return</span>
+
+
+<div class="viewcode-block" id="generateSurfaceTypeByRegionMask"><a class="viewcode-back" href="../../CDUtil/Modules/sftbyrgn.html#cdutil.sftbyrgn.generateSurfaceTypeByRegionMask">[docs]</a><span class="k">def</span> <span class="nf">generateSurfaceTypeByRegionMask</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span><span class="n">sftbyrgn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">sftbyrgnmask</span><span class="o">=</span><span class="mi">215</span><span class="p">,</span><span class="n">regions</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">201</span><span class="p">,</span><span class="mi">223</span><span class="p">),</span><span class="n">maximum_regions_per_cell</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span><span class="n">extend_up_to</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Maps a &quot;regions&quot; dataset onto a user provided land/sea mask or grid</span>
+<span class="sd">    </span>
+<span class="sd">    Usage:</span>
+<span class="sd">    -----</span>
+<span class="sd">    mapped,found = generateSurfaceTypeByRegionMask(mask,sftbyrgn=None,sftbyrgnmask=None,regions=None,maximum_regions_per_cell=4,extend_up_to=3,verbose=True)</span>
+
+<span class="sd">    Input:</span>
+<span class="sd">    -----</span>
+<span class="sd">    mask                        User provided land/sea mask (100/0) or grid (the land/sea mask will be generated automagically) which will be mapped using the &quot;sftbyrgn&quot; internal dataset (will generate a land/sea mask for you)</span>
+<span class="sd">    sftbyrgn                    Mask you wish to map onto your grid (if None uses internal &quot;sftbyrgn&quot; dataset (old ezget type))</span>
+<span class="sd">    sftbyrgnmask                Land/sea mask for sftbyrgn (or a number specifying value limits for sftbyrgn which indicates land/sea threshold (greater values are land) - see URL below for integer region map)</span>
+<span class="sd">    regions                     Numbers from sftbyrgn array that you want to map onto mask (integers from 201-222)</span>
+<span class="sd">    maximum_regions_per_cell    Maximum number of regions considered for a single cell</span>
+<span class="sd">    extend_up_to                How many grid cells around a cell can we extend to identify a guess</span>
+<span class="sd">    verbose                     Prints to the screen what&#39;s going on (default is True)</span>
+
+<span class="sd">    Output:</span>
+<span class="sd">    -----</span>
+<span class="sd">    mapped                      Mapped input grid/mask using provided (or default) regions - sftbyrgn -&gt; user provided grid/mask</span>
+<span class="sd">    found                       Matrix containing number of regions matched for each output cell</span>
+<span class="sd">    </span>
+<span class="sd">    Notes:</span>
+<span class="sd">    -----</span>
+<span class="sd">    - More detailed information, including a region map and tabulated region numbers are available from http://www-pcmdi.llnl.gov/publications/pdf/34.pdf</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">cdat_info</span><span class="o">.</span><span class="n">pingPCMDIdb</span><span class="p">(</span><span class="s2">&quot;cdat&quot;</span><span class="p">,</span><span class="s2">&quot;cdutil.generateSurfaceTypeByRegionMask&quot;</span><span class="p">)</span>
+    <span class="c1">## OK first determine which regions are available</span>
+    <span class="c1">## Must be integer values</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span><span class="n">cdms2</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">TransientRectGrid</span><span class="p">):</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">cdutil</span><span class="o">.</span><span class="n">generateLandSeaMask</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span><span class="o">*</span><span class="mf">100.</span>
+
+    <span class="k">if</span> <span class="n">sftbyrgn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">sftbyrgn</span> <span class="o">=</span> <span class="n">cdms2</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cdat_info</span><span class="o">.</span><span class="n">get_prefix</span><span class="p">(),</span><span class="s1">&#39;share&#39;</span><span class="p">,</span><span class="s1">&#39;cdutil&#39;</span><span class="p">,</span><span class="s1">&#39;sftbyrgn.nc&#39;</span><span class="p">))(</span><span class="s1">&#39;sftbyrgn&#39;</span><span class="p">)</span>
+        
+    <span class="k">if</span> <span class="n">regions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;Preparing regions&#39;</span>
+        <span class="c1">#regions = range(201,223)</span>
+
+        <span class="n">regions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">10000</span><span class="p">):</span>
+            <span class="n">genutil</span><span class="o">.</span><span class="n">statusbar</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">9999</span><span class="p">)</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">MV2</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">MV2</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">MV2</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">sftbyrgn</span><span class="p">,</span><span class="n">i</span><span class="p">)),</span><span class="mi">0</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">c</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span> <span class="n">regions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;Regions:&#39;</span><span class="p">,</span><span class="n">regions</span>
+    <span class="c1">## If no mask passed fr sftbyrgn, assumes everything greater 5000 is land)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sftbyrgnmask</span><span class="p">,</span><span class="nb">int</span><span class="p">):</span>
+        <span class="n">split</span>           <span class="o">=</span> <span class="n">sftbyrgnmask</span>
+        <span class="n">n</span>               <span class="o">=</span> <span class="n">MV2</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
+        <span class="n">sftbyrgnmask</span>    <span class="o">=</span> <span class="n">MV2</span><span class="o">.</span><span class="n">greater_equal</span><span class="p">(</span><span class="n">sftbyrgn</span><span class="p">,</span><span class="n">sftbyrgnmask</span><span class="p">)</span><span class="o">*</span><span class="n">n</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">split</span>           <span class="o">=</span> <span class="n">MV2</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">sftbyrgnmask</span><span class="p">)</span><span class="o">/</span><span class="mf">2.</span>
+    <span class="c1">## Now guess the type for each regions</span>
+    <span class="n">keys</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1">## ## Nice way to do it</span>
+    <span class="c1">##     for r in regions:</span>
+    <span class="c1">##         c=MV2.not_equal(sftbyrgn,r)</span>
+    <span class="c1">##         c=MV2.masked_where(c,sftbyrgnmask)</span>
+    <span class="c1">##         n=MV2.count(c)</span>
+    <span class="c1">##         c=float(MV2.sum(MV2.ravel(c),0)/n)</span>
+    <span class="c1">##         print r,c,n</span>
+    <span class="c1">##         keys[r]=c</span>
+    <span class="c1">## Fast but not so &quot;general&quot; way to do it</span>
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">regions</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">r</span><span class="o">&lt;</span> <span class="n">split</span><span class="p">:</span>
+            <span class="n">keys</span><span class="p">[</span><span class="n">r</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">keys</span><span class="p">[</span><span class="n">r</span><span class="p">]</span> <span class="o">=</span> <span class="mf">100.</span>
+    <span class="n">sh</span>              <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">sh</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">maximum_regions_per_cell</span><span class="p">)</span>
+    <span class="n">potential</span>       <span class="o">=</span> <span class="n">MV2</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">sh</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span><span class="o">*-</span><span class="mi">999</span>
+    <span class="n">potential_reg</span>   <span class="o">=</span> <span class="n">MV2</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">sh</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span><span class="o">*-</span><span class="mi">999</span>
+
+    <span class="n">g1</span>  <span class="o">=</span> <span class="n">sftbyrgn</span><span class="o">.</span><span class="n">getGrid</span><span class="p">()</span>
+    <span class="n">g2</span>  <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">getGrid</span><span class="p">()</span>
+    <span class="n">r1</span>  <span class="o">=</span> <span class="n">regrid2</span><span class="o">.</span><span class="n">Horizontal</span><span class="p">(</span><span class="n">g1</span><span class="p">,</span><span class="n">g2</span><span class="p">)</span>
+    <span class="n">w</span>   <span class="o">=</span> <span class="n">cdutil</span><span class="o">.</span><span class="n">area_weights</span><span class="p">(</span><span class="n">sftbyrgn</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;First pass&#39;</span>
+    <span class="n">itmp</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="k">for</span> <span class="n">ireg</span> <span class="ow">in</span> <span class="n">keys</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">genutil</span><span class="o">.</span><span class="n">statusbar</span><span class="p">(</span><span class="n">itmp</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">itmp</span> <span class="o">+=</span> <span class="mf">1.</span>
+        <span class="n">c</span>       <span class="o">=</span> <span class="n">MV2</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">sftbyrgn</span><span class="p">,</span><span class="n">ireg</span><span class="p">)</span>
+        <span class="n">w2</span>      <span class="o">=</span> <span class="mf">1.</span><span class="o">-</span><span class="n">c</span><span class="o">*</span><span class="n">w</span>
+        <span class="n">s2</span><span class="p">,</span><span class="n">w3</span>   <span class="o">=</span> <span class="n">r1</span><span class="p">(</span><span class="n">sftbyrgn</span><span class="p">,</span><span class="n">mask</span><span class="o">=</span><span class="n">w2</span><span class="o">.</span><span class="n">filled</span><span class="p">(),</span><span class="n">returnTuple</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">c2</span>      <span class="o">=</span> <span class="n">MV2</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span><span class="n">keys</span><span class="p">[</span><span class="n">ireg</span><span class="p">])</span>
+        <span class="n">loop</span><span class="p">(</span><span class="n">potential</span><span class="p">,</span><span class="n">potential_reg</span><span class="p">,</span><span class="n">c2</span><span class="p">,</span><span class="n">w3</span><span class="p">,</span><span class="n">ireg</span><span class="p">)</span>
+
+    <span class="n">found</span> <span class="o">=</span> <span class="n">MV2</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">sh</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span><span class="n">typecode</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">maximum_regions_per_cell</span><span class="p">):</span>
+        <span class="n">found</span> <span class="o">=</span> <span class="n">found</span><span class="o">+</span><span class="n">MV2</span><span class="o">.</span><span class="n">not_equal</span><span class="p">(</span><span class="n">potential</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="o">-</span><span class="mi">999</span><span class="p">)</span>
+    <span class="n">sh2</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sh</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">extend_up_to</span><span class="p">):</span>
+        <span class="n">sh2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">sh</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">sh2</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">sh</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1">## Form the possible i/j couples !</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">MV2</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">MV2</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">MV2</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">potential</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="o">-</span><span class="mi">999</span><span class="p">)),</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;Expanding up to&#39;</span><span class="p">,</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;cells while trying to fix&#39;</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="s1">&#39;cells&#39;</span>
+            <span class="c1">#if dump:</span>
+                <span class="c1">#f=cdms2.open(&#39;tmp_&#39;+str(k)+&#39;.nc&#39;,&#39;w&#39;)</span>
+                <span class="c1">#f.write(sumregions(potential_reg,potential).astype(&#39;f&#39;),id=&#39;sftbyrgn&#39;,axes=mask.getAxisList())</span>
+                <span class="c1">#f.close()</span>
+                <span class="c1">#g=sumregions(potential_reg,potential).astype(&#39;d&#39;)</span>
+                <span class="c1">#g=MV2.masked_equal(g,-999)</span>
+                <span class="c1">#g=MV2.greater(g,4999)*100.</span>
+                <span class="c1">#g=MV2.absolute(mask-g)</span>
+                <span class="c1">#g=MV2.masked_equal(g,0.)</span>
+                <span class="c1">#print &#39;Number of differences:&#39;,MV2.count(g)</span>
+
+        <span class="k">if</span> <span class="nb">float</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">c0</span> <span class="o">=</span> <span class="n">MV2</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">potential</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="o">-</span><span class="mi">999</span><span class="p">)</span>
+            <span class="n">couples</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">sft2</span> <span class="o">=</span> <span class="n">MV2</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">sh2</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span><span class="o">-</span><span class="mf">888.</span>
+            <span class="n">sft2</span><span class="p">[</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">mask</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">k</span><span class="o">+</span><span class="mi">2</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">k</span><span class="o">+</span><span class="mi">2</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">&gt;</span><span class="n">k</span> <span class="ow">or</span> <span class="nb">abs</span><span class="p">(</span><span class="n">j</span><span class="p">)</span><span class="o">&gt;</span><span class="n">k</span><span class="p">:</span> <span class="n">couples</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">])</span>
+            <span class="n">ntot</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">couples</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
+            <span class="n">itmp</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">ireg</span> <span class="ow">in</span> <span class="n">keys</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">c</span> <span class="o">=</span> <span class="n">MV2</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">sftbyrgn</span><span class="p">,</span><span class="n">ireg</span><span class="p">)</span>
+                <span class="n">w2</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">-</span><span class="n">c</span><span class="o">*</span><span class="n">w</span>
+                <span class="n">s2</span><span class="p">,</span><span class="n">w3</span> <span class="o">=</span> <span class="n">r1</span><span class="p">(</span><span class="n">sftbyrgn</span><span class="p">,</span><span class="n">mask</span><span class="o">=</span><span class="n">w2</span><span class="o">.</span><span class="n">filled</span><span class="p">(),</span><span class="n">returnTuple</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">w4</span> <span class="o">=</span> <span class="n">MV2</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">sh2</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span><span class="n">typecode</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+                <span class="n">w4</span><span class="p">[</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">w3</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span> <span class="ow">in</span> <span class="n">couples</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="n">genutil</span><span class="o">.</span><span class="n">statusbar</span><span class="p">(</span><span class="n">itmp</span><span class="p">,</span><span class="n">ntot</span><span class="p">)</span>
+                    <span class="n">itmp</span> <span class="o">+=</span> <span class="mf">1.</span>
+                    <span class="n">c2</span> <span class="o">=</span> <span class="n">MV2</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">sft2</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">j</span><span class="o">+</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="o">+</span><span class="n">sh</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">i</span><span class="o">+</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="o">+</span><span class="n">sh</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span><span class="n">keys</span><span class="p">[</span><span class="n">ireg</span><span class="p">])</span>
+                    <span class="n">c3</span> <span class="o">=</span> <span class="n">MV2</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">sft2</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">j</span><span class="o">+</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="o">+</span><span class="n">sh</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">i</span><span class="o">+</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="o">+</span><span class="n">sh</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span><span class="n">mask</span><span class="p">)</span>
+                    <span class="n">c2</span> <span class="o">=</span> <span class="n">MV2</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span><span class="n">c3</span><span class="p">)</span>
+                    <span class="n">c2</span> <span class="o">=</span> <span class="n">MV2</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span><span class="n">c0</span><span class="p">)</span>
+                    <span class="n">loop</span><span class="p">(</span><span class="n">potential</span><span class="p">,</span><span class="n">potential_reg</span><span class="p">,</span><span class="n">c2</span><span class="p">,</span><span class="n">w4</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">j</span><span class="o">+</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="o">+</span><span class="n">sh</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">i</span><span class="o">+</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="o">+</span><span class="n">sh</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span><span class="n">ireg</span><span class="p">)</span>
+           
+        <span class="n">found</span> <span class="o">=</span> <span class="n">MV2</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">MV2</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">potential</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="o">-</span><span class="mi">999</span><span class="p">),</span><span class="n">found</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">found</span><span class="p">)</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="n">sumregions</span><span class="p">(</span><span class="n">potential_reg</span><span class="p">,</span><span class="n">potential</span><span class="p">)</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">setAxisList</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">getAxisList</span><span class="p">())</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="s1">&#39;sftbyrgn&#39;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">)</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">missing_value</span> <span class="o">=</span> <span class="o">-</span><span class="mi">999</span>
+    <span class="n">found</span><span class="o">.</span><span class="n">setAxisList</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">getAxisList</span><span class="p">())</span>
+    <span class="n">found</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="s1">&#39;found&#39;</span>
+    <span class="n">found</span> <span class="o">=</span> <span class="n">found</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">)</span>
+    <span class="n">found</span><span class="o">.</span><span class="n">missing_value</span> <span class="o">=</span> <span class="o">-</span><span class="mi">999</span>
+
+    <span class="k">del</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">del</span><span class="p">(</span><span class="n">found</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span><span class="p">,</span><span class="n">found</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Charles Doutriaux.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,324 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>cdutil.region &#8212; CDUtil 2.8 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '2.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for cdutil.region</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Adapted for numpy/ma/cdms2 by convertcdms.py</span>
+<span class="kn">from</span> <span class="nn">cdms2.selectors</span> <span class="k">import</span> <span class="n">SelectorComponent</span>
+<span class="kn">import</span> <span class="nn">cdat_info</span>
+<div class="viewcode-block" id="DomainComponent"><a class="viewcode-back" href="../../CDUtil/Modules/region.html#cdutil.region.DomainComponent">[docs]</a><span class="k">class</span> <span class="nc">DomainComponent</span><span class="p">(</span><span class="n">SelectorComponent</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;gets a domain, and by default adjusts the bounds to the domain</span>
+<span class="sd">    or if exact is set to 0 or None gets all the domain that has</span>
+<span class="sd">    parts of the domain requested, also post processing allows you to apply a mask</span>
+<span class="sd">    dimension names can be passed as keywords,</span>
+<span class="sd">    but if no name is passed arguments are taken in order and applied to the corresponding axis</span>
+<span class="sd">    Overwritting an axis (2 keywords or keyword + argument) is not allowed</span>
+<span class="sd">    Example of use:</span>
+<span class="sd">    NH=cdms.selectors.Selector(domain(latitude=(0.,90.)))</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; initialise some value such as tolerances for equality&#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">=</span><span class="n">args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kargs</span><span class="o">=</span><span class="n">kargs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atol</span><span class="o">=</span><span class="n">kargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;atol&#39;</span><span class="p">,</span><span class="mf">1.E-8</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rtol</span><span class="o">=</span><span class="n">kargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;rtol&#39;</span><span class="p">,</span><span class="mf">1.E-5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exact</span><span class="o">=</span><span class="n">kargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;exact&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exact</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exact</span><span class="p">)</span><span class="o">==</span><span class="nb">type</span><span class="p">(</span><span class="mi">0</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="s1">&#39;Error keyword: &#39;&#39;exact&#39;&#39; value: &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">exact</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39; not legal&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span><span class="o">=</span><span class="s1">&#39;Exact Region Selector</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">s</span><span class="o">+=</span><span class="s1">&#39;Arguments: (&#39;</span>
+            <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">):</span>
+                <span class="n">s</span><span class="o">+=</span><span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;, &#39;</span>
+            <span class="n">s</span><span class="o">+=</span><span class="s1">&#39;)</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kargs</span><span class="o">!=</span><span class="p">{}:</span>
+            <span class="n">s</span><span class="o">+=</span><span class="s1">&#39;Keywords:</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">kargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">s</span><span class="o">+=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;:&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kargs</span><span class="p">[</span><span class="n">k</span><span class="p">])</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">return</span> <span class="n">s</span>
+    
+<div class="viewcode-block" id="DomainComponent.specify"><a class="viewcode-back" href="../../CDUtil/Modules/region.html#cdutil.region.DomainComponent.specify">[docs]</a>    <span class="k">def</span> <span class="nf">specify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">slab</span><span class="p">,</span><span class="n">axes</span><span class="p">,</span><span class="n">specification</span><span class="p">,</span><span class="n">confined_by</span><span class="p">,</span><span class="n">aux</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; First part: confine the slab within a Domain wide enough to do the exact in post&#39;&#39;&#39;</span>
+        <span class="kn">import</span> <span class="nn">string</span><span class="o">,</span><span class="nn">copy</span>
+        <span class="kn">from</span> <span class="nn">numpy.ma</span> <span class="k">import</span> <span class="n">minimum</span><span class="p">,</span><span class="n">maximum</span>
+        <span class="c1"># myconfined is for later, we can&#39;t confine a dimension twice with an argument plus a keyword or 2 keywords</span>
+        <span class="n">myconfined</span><span class="o">=</span><span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aux</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">specification</span><span class="p">)</span>
+        <span class="c1"># First look at the arguments (i.e not keywords) and confine the dimensions</span>
+        <span class="c1"># in the order of the arguments</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">confined_by</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">:</span>  <span class="c1"># Check it hasn&#39;t been confined by somebody else</span>
+                <span class="n">myconfined</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span>  <span class="c1"># dim confined by argument list</span>
+                <span class="n">confined_by</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span> <span class="c1"># for cdms I want to confine this dimension</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">aux</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">specs</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="c1"># How do we want to confine this dim ?</span>
+                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">specs</span><span class="p">)</span><span class="o">==</span><span class="nb">type</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">)):</span>
+                    <span class="n">specification</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">specs</span>  <span class="c1"># If it&#39;s a slicing nothing to do</span>
+                <span class="k">else</span><span class="p">:</span> <span class="c1"># But if it&#39;s not...</span>
+                    <span class="k">if</span> <span class="n">specs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">tmp</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">getBounds</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="n">tmp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="s1">&#39;Region error, axis:&#39;</span><span class="o">+</span><span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="o">+</span><span class="s1">&#39; has no bounds&#39;</span>
+                        <span class="n">specs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">minimum</span><span class="p">(</span><span class="n">minimum</span><span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">tmp</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+                    <span class="k">if</span> <span class="n">specs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">tmp</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">getBounds</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="n">tmp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="s1">&#39;Region error, axis:&#39;</span><span class="o">+</span><span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="o">+</span><span class="s1">&#39; has no bounds&#39;</span>
+                        <span class="n">specs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">maximum</span><span class="p">(</span><span class="n">maximum</span><span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">tmp</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+                    <span class="k">if</span> <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">isTime</span><span class="p">():</span> <span class="c1"># Time is as always &quot;Special&quot;</span>
+                        <span class="kn">import</span> <span class="nn">cdtime</span>
+                        <span class="n">tc</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="n">cdtime</span><span class="o">.</span><span class="n">comptime</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>  <span class="c1"># component time type</span>
+                        <span class="n">tr</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="n">cdtime</span><span class="o">.</span><span class="n">reltime</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;months since 0&#39;</span><span class="p">))</span>  <span class="c1"># relative time type</span>
+                        <span class="n">t</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="n">specs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="c1"># my first spec type</span>
+                        <span class="k">if</span> <span class="n">t</span><span class="o">==</span><span class="nb">type</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">):</span> <span class="c1">#if my first spec is passed as a string</span>
+                            <span class="n">specs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">cdtime</span><span class="o">.</span><span class="n">s2r</span><span class="p">(</span><span class="n">specs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
+                        <span class="k">elif</span> <span class="n">t</span><span class="o">==</span><span class="n">tc</span> <span class="ow">or</span> <span class="n">t</span><span class="o">==</span><span class="n">tr</span><span class="p">:</span> <span class="c1">#if my first spec is passed as a cdtime object</span>
+                            <span class="n">specs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">cdtime</span><span class="o">.</span><span class="n">torel</span><span class="p">(</span><span class="n">specs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span> <span class="c1"># If not it has to be that the users knows the time values in the axis</span>
+                            <span class="k">pass</span>
+                        <span class="n">t</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="n">specs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="c1"># my second spec type</span>
+                        <span class="k">if</span> <span class="n">t</span><span class="o">==</span><span class="nb">type</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">):</span> <span class="c1">#if my second spec is passed as a string</span>
+                            <span class="n">specs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">cdtime</span><span class="o">.</span><span class="n">s2r</span><span class="p">(</span><span class="n">specs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
+                        <span class="k">elif</span> <span class="n">t</span><span class="o">==</span><span class="n">tc</span> <span class="ow">or</span> <span class="n">t</span><span class="o">==</span><span class="n">tr</span><span class="p">:</span> <span class="c1">#if my second spec is passed as a cdtime object</span>
+                            <span class="n">specs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">cdtime</span><span class="o">.</span><span class="n">torel</span><span class="p">(</span><span class="n">specs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
+                    <span class="n">sp</span><span class="o">=</span><span class="p">[</span><span class="n">specs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">specs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="s1">&#39;oob&#39;</span><span class="p">]</span>  <span class="c1"># Now retrieve the values wide enough for the exact                    specification[i]=sp  # sets the specifications</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">kw</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">kargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">axis</span><span class="o">=</span><span class="kc">None</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="o">==</span><span class="n">kw</span> <span class="p">:</span> <span class="n">axis</span><span class="o">=</span><span class="n">i</span>
+            <span class="k">if</span> <span class="n">axis</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">kw</span><span class="o">==</span><span class="s1">&#39;time&#39;</span> <span class="p">:</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">)):</span>
+                        <span class="k">if</span> <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">isTime</span><span class="p">()</span> <span class="p">:</span> <span class="n">axis</span><span class="o">=</span><span class="n">i</span>
+                <span class="k">elif</span> <span class="n">kw</span><span class="o">==</span><span class="s1">&#39;level&#39;</span> <span class="p">:</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">)):</span>
+                        <span class="k">if</span> <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">isLevel</span><span class="p">()</span> <span class="p">:</span> <span class="n">axis</span><span class="o">=</span><span class="n">i</span>
+                <span class="k">elif</span> <span class="n">kw</span><span class="o">==</span><span class="s1">&#39;longitude&#39;</span> <span class="p">:</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">)):</span>
+                        <span class="k">if</span> <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">isLongitude</span><span class="p">()</span> <span class="p">:</span> <span class="n">axis</span><span class="o">=</span><span class="n">i</span>
+                <span class="k">elif</span> <span class="n">kw</span><span class="o">==</span><span class="s1">&#39;latitude&#39;</span> <span class="p">:</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">)):</span>
+                        <span class="k">if</span> <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">isLatitude</span><span class="p">()</span> <span class="p">:</span> <span class="n">axis</span><span class="o">=</span><span class="n">i</span>
+                <span class="k">elif</span> <span class="ow">not</span> <span class="n">kw</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;exact&#39;</span><span class="p">,</span><span class="s1">&#39;atol&#39;</span><span class="p">,</span><span class="s1">&#39;rtol&#39;</span><span class="p">]:</span> <span class="c1"># keyword not a recognised keyword or dimension name</span>
+                    <span class="k">raise</span> <span class="s1">&#39;Error, keyword: &#39;</span><span class="o">+</span><span class="n">kw</span><span class="o">+</span><span class="s1">&#39; not recognized&#39;</span>
+            <span class="c1"># At this point, if axis is None:</span>
+            <span class="c1"># we are dealing with a keyword for the selector</span>
+            <span class="c1"># so we&#39;ll skip it</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">axis</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">:</span> 
+                <span class="k">if</span> <span class="n">confined_by</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">confined_by</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span>
+                    <span class="n">myconfined</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">aux</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span><span class="o">=</span><span class="n">specs</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kargs</span><span class="p">[</span><span class="n">kw</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">specs</span><span class="p">)</span><span class="o">!=</span><span class="nb">type</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">)):</span>
+                        <span class="k">if</span> <span class="n">specs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">tmp</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span><span class="o">.</span><span class="n">getBounds</span><span class="p">()</span>
+                            <span class="k">if</span> <span class="n">tmp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="s1">&#39;Region error, axis:&#39;</span><span class="o">+</span><span class="n">axes</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="o">+</span><span class="s1">&#39; has no bounds&#39;</span>
+                            <span class="n">specs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">minimum</span><span class="p">(</span><span class="n">minimum</span><span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">tmp</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+                        <span class="k">if</span> <span class="n">specs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">tmp</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span><span class="o">.</span><span class="n">getBounds</span><span class="p">()</span>
+                            <span class="k">if</span> <span class="n">tmp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="s1">&#39;Region error, axis:&#39;</span><span class="o">+</span><span class="n">axes</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="o">+</span><span class="s1">&#39; has no bounds&#39;</span>
+                            <span class="n">specs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">maximum</span><span class="p">(</span><span class="n">maximum</span><span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">tmp</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+                        <span class="k">if</span> <span class="n">axes</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span><span class="o">.</span><span class="n">isTime</span><span class="p">():</span>
+                            <span class="kn">import</span> <span class="nn">cdtime</span>
+                            <span class="n">tc</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="n">cdtime</span><span class="o">.</span><span class="n">comptime</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+                            <span class="n">tr</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="n">cdtime</span><span class="o">.</span><span class="n">reltime</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;months since 0&#39;</span><span class="p">))</span>
+                            <span class="n">t</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="n">specs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                            <span class="k">if</span> <span class="n">t</span><span class="o">==</span><span class="nb">type</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+                                <span class="n">specs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">cdtime</span><span class="o">.</span><span class="n">s2r</span><span class="p">(</span><span class="n">specs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
+                            <span class="k">elif</span> <span class="n">t</span><span class="o">==</span><span class="n">tc</span> <span class="ow">or</span> <span class="n">t</span><span class="o">==</span><span class="n">tr</span><span class="p">:</span>
+                                <span class="n">specs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">cdtime</span><span class="o">.</span><span class="n">torel</span><span class="p">(</span><span class="n">specs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
+                            <span class="n">t</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="n">specs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                            <span class="k">if</span> <span class="n">t</span><span class="o">==</span><span class="nb">type</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+                                <span class="n">specs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">cdtime</span><span class="o">.</span><span class="n">s2r</span><span class="p">(</span><span class="n">specs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
+                            <span class="k">elif</span> <span class="n">t</span><span class="o">==</span><span class="n">tc</span> <span class="ow">or</span> <span class="n">t</span><span class="o">==</span><span class="n">tr</span><span class="p">:</span>
+                                <span class="n">specs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">cdtime</span><span class="o">.</span><span class="n">torel</span><span class="p">(</span><span class="n">specs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
+                        <span class="n">sp</span><span class="o">=</span><span class="p">[</span><span class="n">specs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">specs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="s1">&#39;oob&#39;</span><span class="p">]</span>
+                        <span class="n">specification</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span><span class="o">=</span><span class="n">sp</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">specification</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span><span class="o">=</span><span class="n">specs</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">myconfined</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="s1">&#39;Error you are attempting to set the axis: &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39; more than once&#39;</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="mi">0</span></div>
+    
+<div class="viewcode-block" id="DomainComponent.same"><a class="viewcode-back" href="../../CDUtil/Modules/region.html#cdutil.region.DomainComponent.same">[docs]</a>    <span class="k">def</span> <span class="nf">same</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Check if data is basically the same than value&#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">data</span><span class="o">-</span><span class="n">value</span><span class="p">)</span><span class="o">&lt;</span><span class="bp">self</span><span class="o">.</span><span class="n">atol</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">rtol</span><span class="o">*</span><span class="nb">abs</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="DomainComponent.post"><a class="viewcode-back" href="../../CDUtil/Modules/region.html#cdutil.region.DomainComponent.post">[docs]</a>    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fetched</span><span class="p">,</span><span class="n">slab</span><span class="p">,</span><span class="n">axes</span><span class="p">,</span><span class="n">specifications</span><span class="p">,</span><span class="n">confined_by</span><span class="p">,</span><span class="n">aux</span><span class="p">,</span><span class="n">axismap</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Post processing retouches the bounds and later will deal with the mask&#39;&#39;&#39;</span>
+        <span class="kn">import</span> <span class="nn">cdms2</span> <span class="k">as</span> <span class="nn">cdms</span>
+        <span class="n">fetched</span><span class="o">=</span><span class="n">cdms</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="n">fetched</span><span class="p">,</span><span class="n">copy</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">faxes</span><span class="o">=</span><span class="n">fetched</span><span class="o">.</span><span class="n">getAxisList</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">exact</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">faxes</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">confined_by</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">self</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">aux</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">!=</span><span class="nb">type</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">)):</span>
+                    <span class="c1"># ok we touched that axis, and didn&#39;t just sliced it let&#39;s adjust the bounds</span>
+                    <span class="n">ax</span><span class="o">=</span><span class="n">faxes</span><span class="p">[</span><span class="n">axismap</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>  <span class="c1"># retrieve the axis and clones it</span>
+                    <span class="n">bounds</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">getBounds</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">bounds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="s1">&#39;Region error, axis:&#39;</span><span class="o">+</span><span class="n">ax</span><span class="o">.</span><span class="n">id</span><span class="o">+</span><span class="s1">&#39; has no bounds&#39;</span>
+                    <span class="n">ax0</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">ax1</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="sd">&#39;&#39;&#39;sets xb with the bounds</span>
+<span class="sd">                    smaller value of axis first</span>
+<span class="sd">                    switches ax0 and ax1 if necessary&#39;&#39;&#39;</span>
+                    <span class="k">if</span> <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">&lt;</span><span class="n">ax</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                        <span class="n">xb</span><span class="o">=</span><span class="p">[</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">bounds</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="c1"># Extreme bounds </span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">xb</span><span class="o">=</span><span class="p">[</span><span class="n">bounds</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="c1"># Extreme bounds</span>
+                        <span class="n">tmp</span><span class="o">=</span><span class="n">ax0</span><span class="o">*</span><span class="mf">1.</span>  <span class="c1"># *1. is just to make sure I&#39;m copying</span>
+                        <span class="n">ax0</span><span class="o">=</span><span class="n">ax1</span><span class="o">*</span><span class="mf">1.</span>
+                        <span class="n">ax1</span><span class="o">=</span><span class="n">tmp</span>
+                    <span class="n">specs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">aux</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="c1"># the specifications</span>
+                    <span class="n">fbound</span><span class="o">=</span><span class="n">specs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># specs for the first bound</span>
+                    <span class="n">lbound</span><span class="o">=</span><span class="n">specs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># specs for the last bound</span>
+                    <span class="k">if</span> <span class="n">fbound</span><span class="o">&gt;</span><span class="n">lbound</span> <span class="p">:</span> <span class="c1"># if the first bound is smaller then flip it</span>
+                        <span class="n">tmp</span><span class="o">=</span><span class="n">fbound</span><span class="o">*</span><span class="mf">1.</span>
+                        <span class="n">fbound</span><span class="o">=</span><span class="n">lbound</span><span class="o">*</span><span class="mf">1.</span>
+                        <span class="n">lbound</span><span class="o">=</span><span class="n">tmp</span>
+                    <span class="n">b0</span><span class="o">=</span><span class="n">xb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># bounds of lower   value of the axis</span>
+                    <span class="n">b1</span><span class="o">=</span><span class="n">xb</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># bounds of greater value of the axis</span>
+                    <span class="sd">&#39;&#39;&#39; The folowing reset the values of the axis</span>
+<span class="sd">                    sets it to the middle of the new cell</span>
+<span class="sd">                    also reset the bounds accordingly&#39;&#39;&#39;</span>
+                    <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">b0</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">&gt;</span><span class="n">fbound</span> <span class="ow">and</span> <span class="n">b0</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">&lt;</span><span class="n">lbound</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">same</span><span class="p">(</span><span class="n">b0</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">fbound</span><span class="p">):</span>  <span class="c1"># make sure they are actually different not just very close</span>
+                            <span class="n">b0</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">fbound</span>
+                            <span class="n">ax0</span><span class="o">=</span><span class="p">(</span><span class="n">b0</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">b0</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="mf">2.</span>
+                    <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">b0</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">&gt;</span><span class="n">fbound</span> <span class="ow">and</span> <span class="n">b0</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">&lt;</span><span class="n">lbound</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">same</span><span class="p">(</span><span class="n">b0</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">fbound</span><span class="p">):</span>
+                            <span class="n">b0</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">fbound</span>
+                            <span class="n">ax0</span><span class="o">=</span><span class="p">(</span><span class="n">b0</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">b0</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="mf">2.</span>
+                    <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">b1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">&gt;</span><span class="n">fbound</span> <span class="ow">and</span> <span class="n">b1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">&lt;</span><span class="n">lbound</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">same</span><span class="p">(</span><span class="n">b1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">lbound</span><span class="p">):</span>
+                            <span class="n">b1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">lbound</span>
+                            <span class="n">ax1</span><span class="o">=</span><span class="p">(</span><span class="n">b1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">b1</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="mf">2.</span>
+                    <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">b1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">&gt;</span><span class="n">fbound</span> <span class="ow">and</span> <span class="n">b1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">&lt;</span><span class="n">lbound</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">same</span><span class="p">(</span><span class="n">b1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">lbound</span><span class="p">):</span>
+                            <span class="n">b1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">lbound</span>
+                            <span class="n">ax1</span><span class="o">=</span><span class="p">(</span><span class="n">b1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">b1</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="mf">2.</span>
+                    <span class="n">xb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">b0</span>
+                    <span class="n">xb</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">b1</span>
+                    <span class="k">if</span> <span class="n">ax</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">&gt;</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                        <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">bounds</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">xb</span> <span class="c1"># Extreme bounds</span>
+                        <span class="n">ax</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">ax1</span>
+                        <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">ax0</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">bounds</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">xb</span> <span class="c1"># Extreme bounds</span>
+                        <span class="n">ax</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">ax0</span>
+                        <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">ax1</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">setBounds</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">faxes</span><span class="p">[</span><span class="n">axismap</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span><span class="o">.</span><span class="n">isLatitude</span><span class="p">():</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">designateLatitude</span><span class="p">()</span>
+                    <span class="n">faxes</span><span class="p">[</span><span class="n">axismap</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span><span class="o">=</span><span class="n">ax</span>
+
+        <span class="n">a</span><span class="o">=</span><span class="n">cdms</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="n">fetched</span><span class="o">.</span><span class="n">filled</span><span class="p">(),</span><span class="n">mask</span><span class="o">=</span><span class="n">fetched</span><span class="o">.</span><span class="n">mask</span><span class="p">,</span><span class="n">axes</span><span class="o">=</span><span class="n">faxes</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">a</span>                        </div></div>
+                        
+<div class="viewcode-block" id="domain"><a class="viewcode-back" href="../../CDUtil/Modules/region.html#cdutil.region.domain">[docs]</a><span class="k">def</span> <span class="nf">domain</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;construct the selector&#39;&#39;&#39;</span>
+    <span class="kn">import</span> <span class="nn">cdms2</span> <span class="k">as</span> <span class="nn">cdms</span>
+    <span class="n">cdat_info</span><span class="o">.</span><span class="n">pingPCMDIdb</span><span class="p">(</span><span class="s2">&quot;cdat&quot;</span><span class="p">,</span><span class="s2">&quot;cdutil.region.domain&quot;</span><span class="p">)</span>
+    <span class="n">a</span><span class="o">=</span><span class="n">cdms</span><span class="o">.</span><span class="n">selectors</span><span class="o">.</span><span class="n">Selector</span><span class="p">(</span><span class="n">DomainComponent</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kargs</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">a</span></div>
+
+<span class="n">NH</span><span class="o">=</span><span class="n">NorthernHemisphere</span><span class="o">=</span><span class="n">domain</span><span class="p">(</span><span class="n">latitude</span><span class="o">=</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span><span class="kc">None</span><span class="p">))</span>
+<span class="n">SH</span><span class="o">=</span><span class="n">SouthernHemisphere</span><span class="o">=</span><span class="n">domain</span><span class="p">(</span><span class="n">latitude</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span><span class="mf">0.</span><span class="p">))</span>
+<span class="n">Tropics</span><span class="o">=</span><span class="n">domain</span><span class="p">(</span><span class="n">latitude</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">23.4</span><span class="p">,</span><span class="mf">23.4</span><span class="p">))</span>
+<span class="n">NPZ</span><span class="o">=</span><span class="n">AZ</span><span class="o">=</span><span class="n">ArcticZone</span><span class="o">=</span><span class="n">domain</span><span class="p">(</span><span class="n">latitude</span><span class="o">=</span><span class="p">(</span><span class="mf">66.6</span><span class="p">,</span><span class="kc">None</span><span class="p">))</span>
+<span class="n">SPZ</span><span class="o">=</span><span class="n">AAZ</span><span class="o">=</span><span class="n">AntarcticZone</span><span class="o">=</span><span class="n">domain</span><span class="p">(</span><span class="n">latitude</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span><span class="o">-</span><span class="mf">66.6</span><span class="p">))</span>
+
+
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Charles Doutriaux.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

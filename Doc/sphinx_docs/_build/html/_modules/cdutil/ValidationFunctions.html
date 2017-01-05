@@ -1,0 +1,280 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>cdutil.ValidationFunctions &#8212; CDUtil 2.8 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '2.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for cdutil.ValidationFunctions</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Adapted for numpy/ma/cdms2 by convertcdms.py</span>
+<span class="kn">import</span> <span class="nn">string</span>
+<span class="kn">import</span> <span class="nn">types</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">numpy.ma</span>
+<span class="kn">import</span> <span class="nn">cdms2</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">cdutil</span>
+
+<div class="viewcode-block" id="checkStringOrNone"><a class="viewcode-back" href="../../CDUtil/Modules/ValidationFunctions.html#cdutil.ValidationFunctions.checkStringOrNone">[docs]</a><span class="k">def</span> <span class="nf">checkStringOrNone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Checks to see if value is a string or None</span>
+<span class="sd">    :param name: The name of the value</span>
+<span class="sd">    :type name: str</span>
+
+<span class="sd">    :param value: The value to check the type of</span>
+<span class="sd">    :type value: any</span>
+
+<span class="sd">    :returns: If value is None or a string, value will be returned. If not, an error will be raised.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">StringType</span><span class="p">,</span><span class="n">types</span><span class="o">.</span><span class="n">NoneType</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">,</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39; must be a string or None&#39;</span>
+    <span class="k">return</span> <span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="checkListNumbers"><a class="viewcode-back" href="../../CDUtil/Modules/ValidationFunctions.html#cdutil.ValidationFunctions.checkListNumbers">[docs]</a><span class="k">def</span> <span class="nf">checkListNumbers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Checks to make sure a list or tuple contains values that are only numbers</span>
+<span class="sd">    :param name: string name of the value being checked</span>
+<span class="sd">    :type name: str</span>
+<span class="sd">    :param value: A list or tuple, which will be checked to determine if the contents are all numbers.</span>
+<span class="sd">    :type value: list or tuple</span>
+<span class="sd">    :returns: If value contains only numbers, value will be returned. Else, an exception is raised.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">ListType</span><span class="p">,</span><span class="n">types</span><span class="o">.</span><span class="n">TupleType</span><span class="p">,</span><span class="n">types</span><span class="o">.</span><span class="n">NoneType</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; must be a list/tuple/None&#39;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">IntType</span><span class="p">,</span><span class="n">types</span><span class="o">.</span><span class="n">LongType</span><span class="p">,</span><span class="n">types</span><span class="o">.</span><span class="n">FloatType</span><span class="p">]:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; list/tuple elements must be numbers&#39;</span>
+    <span class="k">return</span> <span class="n">value</span></div>
+    
+<div class="viewcode-block" id="setSlab"><a class="viewcode-back" href="../../CDUtil/Modules/ValidationFunctions.html#cdutil.ValidationFunctions.setSlab">[docs]</a><span class="k">def</span> <span class="nf">setSlab</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    If value is a numpy ndarray or numpy MA, this function sets the object&#39;s data field to the value.</span>
+<span class="sd">    :param name: string name of the value being checked</span>
+<span class="sd">    :type name: str</span>
+<span class="sd">    :param value:</span>
+<span class="sd">    :returns: If value is a numpy ndarray or numpy MA, returns (&#39;data&#39;,value).</span>
+<span class="sd">            If value is a string, and the string is a filename in the system&#39;s path, returns (&#39;file&#39;,value).</span>
+<span class="sd">            If value is None, returns name,value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="p">)</span> <span class="ow">or</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">isMA</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">=</span><span class="n">value</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="n">types</span><span class="o">.</span><span class="n">StringType</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+            <span class="k">return</span><span class="p">(</span><span class="s1">&#39;file&#39;</span><span class="p">,</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="n">value</span><span class="o">+</span><span class="s2">&quot; : file does not exist....&quot;</span>
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="n">types</span><span class="o">.</span><span class="n">NoneType</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">name</span><span class="p">,</span><span class="n">value</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="n">name</span><span class="o">+</span><span class="s2">&quot; must be a slab, a file name or None&quot;</span></div>
+
+<span class="k">def</span> <span class="nf">checkAxisType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">checkInStringsListInt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">value</span><span class="p">,[</span>
+                          <span class="p">[</span><span class="s1">&#39;uniform&#39;</span><span class="p">,</span><span class="s1">&#39;rect&#39;</span><span class="p">,</span><span class="s1">&#39;linear&#39;</span><span class="p">],</span>
+                          <span class="s1">&#39;gaussian&#39;</span><span class="p">,</span>
+                          <span class="p">[</span><span class="s1">&#39;equal&#39;</span><span class="p">,</span><span class="s1">&#39;equal area&#39;</span><span class="p">,</span><span class="s1">&#39;equalarea&#39;</span><span class="p">,</span><span class="s1">&#39;equal-area&#39;</span><span class="p">],]</span>
+                          <span class="p">)</span>
+    
+<span class="k">def</span> <span class="nf">checkAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">checkInStringsListInt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">value</span><span class="p">,[</span><span class="s1">&#39;select&#39;</span><span class="p">,</span><span class="s1">&#39;mask&#39;</span><span class="p">])</span>
+    
+<span class="k">def</span>  <span class="nf">setDataSetGrid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span><span class="n">cdutil</span><span class="o">.</span><span class="n">WeightedGridMaker</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">value</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">grid</span><span class="o">=</span><span class="n">value</span>
+    
+<span class="k">def</span> <span class="nf">setGrid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span><span class="n">cdms2</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">AbstractGrid</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">value</span>
+    <span class="k">elif</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">var</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">longitude</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">latitude</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weightsMaker</span><span class="o">=</span><span class="kc">None</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="n">name</span><span class="o">+</span><span class="s2">&quot; must be a grid object or None&quot;</span>
+        
+<span class="k">def</span> <span class="nf">setSlabOnly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="p">)</span> <span class="ow">or</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">isMA</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">value</span>
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="n">types</span><span class="o">.</span><span class="n">NoneType</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">value</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="n">name</span><span class="o">+</span><span class="s2">&quot; must be a slab or None&quot;</span>
+    
+<span class="k">def</span> <span class="nf">getSlab</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">):</span>
+    <span class="n">value</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">times</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">times</span>
+        <span class="n">times_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">times_type</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">times</span><span class="o">=</span><span class="kc">None</span>
+        <span class="n">times_type</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">times_type</span> <span class="o">==</span> <span class="s1">&#39;indices&#39;</span><span class="p">:</span>
+        <span class="n">times</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="n">times</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">times</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        
+    <span class="k">if</span> <span class="nb">isinstance</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="p">)</span> <span class="ow">or</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">isMA</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">value</span>
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">==</span><span class="n">types</span><span class="o">.</span><span class="n">StringType</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">=</span><span class="n">cdms2</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">times</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">v</span><span class="o">=</span><span class="n">f</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">var</span><span class="p">,</span><span class="n">time</span><span class="o">=</span><span class="n">times</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">v</span><span class="o">=</span><span class="n">f</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">var</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">v</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+<span class="k">def</span> <span class="nf">checkNumberOrNone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">IntType</span><span class="p">,</span><span class="n">types</span><span class="o">.</span><span class="n">FloatType</span><span class="p">,</span><span class="n">types</span><span class="o">.</span><span class="n">LongType</span><span class="p">,</span><span class="n">types</span><span class="o">.</span><span class="n">NoneType</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">,</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39; must be an integer, a float, or None&#39;</span>
+    <span class="k">return</span> <span class="n">value</span>
+
+<span class="k">def</span> <span class="nf">checkIntOrNone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">IntType</span><span class="p">,</span><span class="n">types</span><span class="o">.</span><span class="n">LongType</span><span class="p">,</span><span class="n">types</span><span class="o">.</span><span class="n">NoneType</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">,</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39; must be an integer or None&#39;</span>
+    <span class="k">return</span> <span class="n">value</span>
+
+    
+<div class="viewcode-block" id="checkInStringsList"><a class="viewcode-back" href="../../CDUtil/Modules/ValidationFunctions.html#cdutil.ValidationFunctions.checkInStringsList">[docs]</a><span class="k">def</span> <span class="nf">checkInStringsList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">value</span><span class="p">,</span><span class="n">values</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; check if value is in values&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">==</span><span class="n">types</span><span class="o">.</span><span class="n">StringType</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;must be a string&#39;</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">string</span><span class="o">.</span><span class="n">lower</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+        <span class="n">err</span><span class="o">=</span><span class="n">name</span><span class="o">+</span><span class="s2">&quot; must be in (&#39;&quot;</span><span class="o">+</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">err</span><span class="o">=</span><span class="n">err</span><span class="o">+</span><span class="s2">&quot;, &#39;&quot;</span><span class="o">+</span><span class="n">v</span><span class="o">+</span><span class="s2">&quot;&#39;&quot;</span>
+        <span class="n">err</span><span class="o">=</span><span class="n">err</span><span class="o">+</span><span class="s2">&quot; or &#39;&quot;</span><span class="o">+</span><span class="n">values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="s2">&quot;&#39;)&quot;</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="n">err</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_basic_set</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">string</span><span class="o">.</span><span class="n">lower</span><span class="p">(</span><span class="n">value</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="checkInStringsListInt"><a class="viewcode-back" href="../../CDUtil/Modules/ValidationFunctions.html#cdutil.ValidationFunctions.checkInStringsListInt">[docs]</a><span class="k">def</span> <span class="nf">checkInStringsListInt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">value</span><span class="p">,</span><span class="n">values</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; checks the line type&quot;&quot;&quot;</span>
+    <span class="n">val</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">str1</span><span class="o">=</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; can either be (&#39;</span>
+    <span class="n">str2</span><span class="o">=</span><span class="s1">&#39; or (&#39;</span>
+    <span class="n">i</span><span class="o">=</span><span class="mi">0</span>
+    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">v</span><span class="o">==</span><span class="s1">&#39;&#39;</span><span class="p">:</span> <span class="c1"># skips the invalid/non-contiguous values</span>
+            <span class="n">str2</span><span class="o">=</span><span class="n">str2</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;, &#39;</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">ListType</span><span class="p">,</span><span class="n">types</span><span class="o">.</span><span class="n">TupleType</span><span class="p">]:</span>
+                <span class="n">str1</span><span class="o">=</span><span class="n">str1</span><span class="o">+</span><span class="s2">&quot;&#39;&quot;</span><span class="o">+</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="s2">&quot;&#39;, &quot;</span>
+                <span class="k">for</span> <span class="n">v2</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span>
+                    <span class="n">val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v2</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+                <span class="n">str1</span><span class="o">=</span><span class="n">str1</span><span class="o">+</span><span class="s2">&quot;&#39;&quot;</span><span class="o">+</span><span class="n">v</span><span class="o">+</span><span class="s2">&quot;&#39;, &quot;</span>
+            <span class="n">i</span><span class="o">=</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span>
+    <span class="n">err</span><span class="o">=</span><span class="n">str1</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;)&#39;</span><span class="o">+</span><span class="n">str2</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;)&#39;</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">==</span><span class="n">types</span><span class="o">.</span><span class="n">StringType</span><span class="p">:</span>
+        <span class="n">value</span><span class="o">=</span><span class="n">string</span><span class="o">.</span><span class="n">lower</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">val</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="n">err</span>
+        <span class="n">i</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">ListType</span><span class="p">,</span><span class="n">types</span><span class="o">.</span><span class="n">TupleType</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">i</span>
+            <span class="k">elif</span> <span class="n">value</span><span class="o">==</span><span class="n">v</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">i</span>
+            <span class="n">i</span><span class="o">=</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span>
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">==</span><span class="n">types</span><span class="o">.</span><span class="n">IntType</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">==</span><span class="n">types</span><span class="o">.</span><span class="n">FloatType</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">==</span><span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="n">err</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="n">err</span></div>
+
+ 
+<span class="k">def</span> <span class="nf">checkNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">IntType</span><span class="p">,</span><span class="n">types</span><span class="o">.</span><span class="n">FloatType</span><span class="p">,</span><span class="n">types</span><span class="o">.</span><span class="n">LongType</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">,</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39; must be an integer or a float&#39;</span>
+    <span class="k">return</span> <span class="n">value</span>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Charles Doutriaux.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
