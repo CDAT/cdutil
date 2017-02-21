@@ -773,7 +773,7 @@ def dayBasedSlicer(tim,arg=None):
                         subarg='feb-29'
                     else:
                         t=cdtime.reltime(index,'month since 1997')
-                        t=t.tocomp()
+                        t=t.tocomp(tim.getCalendar())
                         subarg=str(t.month)+'-'+str(t.day)
                 except:
                     raise Exception,"Error, dayBasedSlicer args must have '-' or '/' as month/day separator"
