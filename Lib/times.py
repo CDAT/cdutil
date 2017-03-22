@@ -140,7 +140,6 @@ def isMonthly(s):
       if month2-month1!=1 : monthly=0
     return monthly
 
-
 def mergeTime(ds,statusbar=1,fill_value=1.e20):
     '''
     Merge chronologically a bunch of slab
