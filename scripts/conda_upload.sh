@@ -24,11 +24,7 @@ cd conda-recipes
 rm -rf uvcdat
 python ./prep_for_build.py -v `date +%Y.%m.%d`
 echo "Building now"
-conda build -c conda-forge -c uvcdat/label/nightly -c uvcdat --numpy=1.11 cdutil
+conda build -c conda-forge -c uvcdat/label/nightly -c uvcdat cdutil
 echo "Uploading"
-anaconda -t $CONDA_UPLOAD_TOKEN upload -u $USER -l nightly $CONDA_BLD_PATH/$OS/$PKG_NAME-`date +%Y.%m.%d`-np111py27_0.tar.bz2 --force
-conda build cdutil -c conda-forge -c uvcdat --numpy=1.10
-anaconda -t $CONDA_UPLOAD_TOKEN upload -u $USER -l nightly $CONDA_BLD_PATH/$OS/$PKG_NAME-`date +%Y.%m.%d`-np110py27_0.tar.bz2 --force
-conda build cdutil -c conda-forge -c uvcdat --numpy=1.9
-anaconda -t $CONDA_UPLOAD_TOKEN upload -u $USER -l nightly $CONDA_BLD_PATH/$OS/$PKG_NAME-`date +%Y.%m.%d`-np19py27_0.tar.bz2 --force
+anaconda -t $CONDA_UPLOAD_TOKEN upload -u $USER -l nightly $CONDA_BLD_PATH/$OS/$PKG_NAME-`date +%Y.%m.%d`-py27_0.tar.bz2 --force
 
