@@ -1,0 +1,23 @@
+import sys
+import cdms2
+import MV2
+import cdutil
+import numpy
+import cdat_info
+import unittest
+
+class CDUTIL(unittest.TestCase):
+    def testKeepmissing(self):
+        f=cdms2.open(cdat_info.get_sampledata_path()+"/clt.nc")
+        s=f("clt")
+        self.assertTrue(numpy.allclose(s.missing_value,1.e20))
+        s.set_fill_value(1.e36)
+        s2=MV2.masked_greater(s,79.)
+        self.assertTrue(numpy.allclose(s.missing_value,1.e36))
+        cdutil.times.setTimeBoundsMonthly(s2)
+        s3=cdutil.ANNUALCYCLE(s2)
+        self.assertTrue(numpy.allclose(s.missing_value,1.e36))
+        s3=cdutil.ANNUALCYCLE.departures(s2)
+        self.assertTrue(numpy.allclose(s.missing_value,1.e36))
+        s3=cdutil.ANNUALCYCLE.climatology(s2)
+        self.assertTrue(numpy.allclose(s.missing_value,1.e36))
