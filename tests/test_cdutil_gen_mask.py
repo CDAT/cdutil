@@ -5,7 +5,7 @@ import numpy
 class CDUTIL(unittest.TestCase):
     def testGenmask(self):
 
-        f=cdms2.open(os.path.join(cdat_info.get_sampledata_path(),"navy_land.nc"))
+        f=cdms2.open(os.path.join(sys.prefix,"share","cdutil","navy_land.nc"))
         navy_frac = f("sftlf")/100.
 
         target = cdms2.open(os.path.join(cdat_info.get_sampledata_path(),'clt.nc'))("clt",slice(0,1)).getGrid()
