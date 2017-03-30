@@ -2,8 +2,7 @@
 ls
 pwd
 export PATH=${HOME}/miniconda/bin:${PATH}
-conda install -c conda-forge -c uvcdat uvcdat pyopenssl nose image-compare
+conda install -c uvcdat/label/nightly -c conda-forge -c uvcdat nose cdms2 genutil cdat_info
 pip install dropbox
 export UVCDAT_ANONYMOUS_LOG=False
-vcs_download_sample_data
 python setup.py install
