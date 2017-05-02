@@ -24,7 +24,7 @@ cd conda-recipes
 rm -rf uvcdat
 python ./prep_for_build.py -v `date +%Y.%m.%d`
 echo "Building now"
-conda build -c conda-forge -c uvcdat/label/nightly -c uvcdat cdutil
+conda build -c uvcdat/label/nightly -c conda-forge -c uvcdat cdutil
 echo "Uploading"
 anaconda -t $CONDA_UPLOAD_TOKEN upload -u $USER -l nightly $CONDA_BLD_PATH/$OS/$PKG_NAME-`date +%Y.%m.%d`-py27_0.tar.bz2 --force
 
