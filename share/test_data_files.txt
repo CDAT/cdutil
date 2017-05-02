@@ -1,4 +1,4 @@
-http://uvcdat.llnl.gov/cdat/sample_data
+https://uvcdat.llnl.gov/cdat/sample_data
 aa51aa896ead44019335cebec68e7955  clt.nc
 332feb65b3801d7ab25845976bd23d85  vertical.nc
 0f928d5cc8b80e6a509a0a00f0fc87ad  tas_mo.nc
