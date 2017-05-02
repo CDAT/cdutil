@@ -135,11 +135,10 @@ def isMonthly(s):
     units=tim.units
     monthly=1
     for i in range(len(tim)-1):
-      month1=cdtime.reltime(tim[i],units).torel('months since 2000').value
-      month2=cdtime.reltime(tim[i+1],units).torel('months since 2000').value
+      month1=cdtime.reltime(tim[i],units).torel('months since 2000',tim.getCalendar()).value
+      month2=cdtime.reltime(tim[i+1],units).torel('months since 2000',tim.getCalendar()).value
       if month2-month1!=1 : monthly=0
     return monthly
-
 
 def mergeTime(ds,statusbar=1,fill_value=1.e20):
     '''
@@ -776,7 +775,7 @@ def dayBasedSlicer(tim,arg=None):
                         subarg='feb-29'
                     else:
                         t=cdtime.reltime(index,'month since 1997')
-                        t=t.tocomp()
+                        t=t.tocomp(tim.getCalendar())
                         subarg=str(t.month)+'-'+str(t.day)
                 except:
                     raise Exception,"Error, dayBasedSlicer args must have '-' or '/' as month/day separator"
