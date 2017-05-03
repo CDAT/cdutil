@@ -34,7 +34,7 @@ def loop(potential,potential_reg,c2,w3,region):
         potential[i]        = MV2.where(c2,potential[i]+w3,potential[i])
     ## Ultimate test to see if more would be needed !
     if not MV2.allequal(MV2.logical_and(c,thisturn),0):
-        raise 'OOOPS WE COULD USE MORE REGIONS BUDDY !'
+        raise 'OOPS WE COULD USE MORE REGIONS BUDDY !'
     return
 
 
@@ -42,28 +42,29 @@ def generateSurfaceTypeByRegionMask(mask,sftbyrgn=None,sftbyrgnmask=215,regions=
     """
     Maps a "regions" dataset onto a user provided land/sea mask or grid
     
-    Usage:
-    -----
-    mapped,found = generateSurfaceTypeByRegionMask(mask,sftbyrgn=None,sftbyrgnmask=None,regions=None,maximum_regions_per_cell=4,extend_up_to=3,verbose=True)
+    :Example:
 
-    Input:
-    -----
-    mask                        User provided land/sea mask (100/0) or grid (the land/sea mask will be generated automagically) which will be mapped using the "sftbyrgn" internal dataset (will generate a land/sea mask for you)
-    sftbyrgn                    Mask you wish to map onto your grid (if None uses internal "sftbyrgn" dataset (old ezget type))
-    sftbyrgnmask                Land/sea mask for sftbyrgn (or a number specifying value limits for sftbyrgn which indicates land/sea threshold (greater values are land) - see URL below for integer region map)
-    regions                     Numbers from sftbyrgn array that you want to map onto mask (integers from 201-222)
-    maximum_regions_per_cell    Maximum number of regions considered for a single cell
-    extend_up_to                How many grid cells around a cell can we extend to identify a guess
-    verbose                     Prints to the screen what's going on (default is True)
+        .. doctest:: sftbyrgn_generateSurfaceTypeByRegionMask
 
-    Output:
-    -----
-    mapped                      Mapped input grid/mask using provided (or default) regions - sftbyrgn -> user provided grid/mask
-    found                       Matrix containing number of regions matched for each output cell
+            >>> mapped,found = generateSurfaceTypeByRegionMask(mask)
+
+    :param mask: User provided land/sea mask (100/0) or grid (the land/sea mask will be generated automagically)
+            which will be mapped using the "sftbyrgn" internal dataset (will generate a land/sea mask for you)
+    :param sftbyrgn: Mask you wish to map onto your grid (if None uses internal "sftbyrgn" dataset (old ezget type))
+    :param sftbyrgnmask: Land/sea mask for sftbyrgn (or a number specifying value limits for sftbyrgn which indicates
+            land/sea threshold (greater values are land) - see URL below for integer region map)
+    :param regions: Numbers from sftbyrgn array that you want to map onto mask (integers from 201-222)
+    :param maximum_regions_per_cell: Maximum number of regions considered for a single cell
+    :param extend_up_to: How many grid cells around a cell can we extend to identify a guess
+    :param verbose: Prints to the screen what's going on (default is True)
+
+    :returns: The mapped input grid/mask using provided (or default) regions - sftbyrgn -> user provided grid/mask AND
+             A matrix containing number of regions matched for each output cell
     
-    Notes:
-    -----
-    - More detailed information, including a region map and tabulated region numbers are available from http://www-pcmdi.llnl.gov/publications/pdf/34.pdf
+    .. note::
+
+        More detailed information, including a region map and tabulated region numbers are available from
+        http://www-pcmdi.llnl.gov/publications/pdf/34.pdf
     """
     
     cdat_info.pingPCMDIdb("cdat","cdutil.generateSurfaceTypeByRegionMask")

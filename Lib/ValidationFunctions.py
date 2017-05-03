@@ -8,13 +8,32 @@ import os
 import cdutil
 
 def checkStringOrNone(self,name,value):
+    """
+    Checks to see if value is a string or None
+
+    :param name: The name of the value
+    :type name: str
+
+    :param value: The value to check the type of
+    :type value: any
+
+    :returns: If value is None or a string, value is returned. Else, an exception is raised.
+    """
     if not type(value) in [types.StringType,types.NoneType]:
         raise ValueError,name+' must be a string or None'
     return value
 
 
 def checkListNumbers(self,name,value):
-    """ check for a list of 4 number"""
+    """
+    Checks to make sure a list or tuple contains values that are only numbers
+
+    :param name: string name of the value being checked
+    :type name: str
+    :param value: A list or tuple, which will be checked to determine if the contents are all numbers.
+    :type value: list or tuple
+    :returns: If value contains only numbers, value is returned. Else, an exception is raised.
+    """
     if not type(value) in [types.ListType,types.TupleType,types.NoneType]:
         raise ValueError, name + ' must be a list/tuple/None'
     if not value is None:
@@ -24,6 +43,16 @@ def checkListNumbers(self,name,value):
     return value
     
 def setSlab(self,name,value):
+    """
+    If value is a numpy ndarray or numpy MA, this function sets the object's data field to the value.
+
+    :param name: string name of the value being checked
+    :type name: str
+    :param value:
+    :returns: If value is a numpy ndarray or numpy MA, returns ('data',value).
+        If value is a string, and the string is a filename in the system's path, returns ('file',value).
+        If value is None, returns name,value.
+    """
     if isinstance (value,numpy.ndarray ) or numpy.ma.isMA(value):
         self.data=value
         return ('data',value)
@@ -110,7 +139,20 @@ def checkIntOrNone(self,name,value):
 
     
 def checkInStringsList(self,name,value,values):
-    """ check if value is in values"""
+    """
+    Checks the contents of a list of strings for a specific value.
+    If the value is in the list of values, the object's property (given by the name parameter)
+    will be set to that value. Else, an exception will be raised.
+
+    :param name: String name of the property to set if value is in values
+    :type name: str
+
+    :param value: string to search for in the values list
+    :type values: str
+
+    :param values: list of strings to search through for value
+    :type values: list
+    """
     if not type(value)==types.StringType:
         raise ValueError, name + 'must be a string'
     elif not string.lower(value) in values:
@@ -122,7 +164,9 @@ def checkInStringsList(self,name,value,values):
     self._basic_set(name,string.lower(value))
 
 def checkInStringsListInt(self,name,value,values):
-    """ checks the line type"""
+    """
+    Checks the line type
+    """
     val=[]
     str1=name + ' can either be ('
     str2=' or ('

@@ -5,11 +5,13 @@
 import cdms2
 
 def writenetcdf (slab, filename, mode="a"):
-    """writenetcdf(slab, filename, mode="a") writes slab to the file.
-       modes: 'a'  append
-              'w'  replace
-              'r'  replace (for legacy code only, deprecated)
-       s can be anything asVariable will accept
+    """
+    writenetcdf(slab, filename, mode="a") writes slab to the file.
+    :param mode: One of 'a' append, or 'w'  replace
+    :type mode: str
+
+    :param slab: Anything :py:func:`cdms2.asVariable` will accept
+    :type: see :py:func:`cdms2.asVariable`
     """
     if mode == 'r': mode = 'w'
     slab = cdms2.asVariable(slab, 0)

@@ -5,17 +5,19 @@ import cdms2,cdtime,string,types,numpy.ma,sys
 import cdat_info
 
 def centroid(msk,bounds,coords=None):
-    ''' Computes the centroid of a bunch of point
+    """
+    Computes the centroid of a bunch of points.
     Authors: Charles Doutriaux/Karl Taylor
     Date: April 2001
-    Input:
-      s: a slab
-      bounds : the bounds of the overall thing      
-      coords : the coordinate spanned by each subset
-    Output:
-      centroid: a slab representing the centroid, values are between 0 (data evenly distributed evenly across the center) and +/-1 (data not evenly distributed)
-      centroid is 1D less than s
-      '''
+    :param msk: A slab (cdms2 TransientVariable)
+    :type msk: cdms2.tvariable.TransientVariable
+
+    :param bounds: The bounds of the overall thing.
+    :param coords : The coordinates spanned by each subset
+
+    :returns: A slab representing the centroid.  Values are between 0 (data evenly distributed evenly across the center)
+                and +/-1 (data not evenly distributed). Centroid is 1D less than msk
+    """
     # determine the length,spread, shape and mean
     sh=msk.shape
     mean=float(bounds[1]+bounds[0])/2.
@@ -46,17 +48,28 @@ def centroid(msk,bounds,coords=None):
     return msk
 
 def cyclicalcentroid(s,bounds,coords=None):
-    '''
-    returns the centroid, but this assumes cyclical axis, therefore spread the points around a circle, before computing the centroid
-    Usage:
-      cyclecentroid=cyclicalcentroid(s,bounds)
-    Input:
-      s: a slab
-      bounds : the bounds of the overall thing      
-      coords : the coordinate spanned by each subset
-    Output:
-      cyclecentroid : slab is same shape than s but without the 1st dim
-    '''
+    """
+    Returns the centroid, but this assumes cyclical axis.
+
+    :Example:
+
+        .. doctest:: times_cyclicalcentroid
+
+            >>> import cdms2
+            >>> import vcs
+            >>> vcs.download_sample_data_files()
+            >>> f=cdms2.open(vcs.sampledata + '/clt.nc')
+            >>> s=f('clt')
+            >>> cyclecentroid=cyclicalcentroid(s,bounds)
+
+    :param s: A slab (cdms2 TransientVariable)
+    :type s: cdms2.tvariable.TransientVariable
+    :param bounds: The bounds of the overall thing
+    :param coords: The coordinates spanned by each subset
+
+    :returns: A slab representing the cyclecentroid, which is the same shape as s but without the 1st dimension
+    :rtype: cdms2.tvariable.TransientVariable
+    """
     if coords is None:
         coords=s.getAxis(0).getBounds() # if MV2 then gets the bounds from there
     n=len(coords)
@@ -73,7 +86,7 @@ def cyclicalcentroid(s,bounds,coords=None):
     return numpy.sqrt(xc*xc+yc*yc)/numpy.sqrt(2.)
 
 def getMonthString(my_list):
-    '''Given a list of month creates the string representing the sequence'''
+    """Given a list of months creates the string representing the sequence"""
     if not type(my_list) in [types.ListType,types.TupleType]:
         my_list=[my_list]
     dic = {
@@ -90,9 +103,15 @@ def getMonthString(my_list):
 def getMonthIndex(my_str):
    """
    Given a string representing a month or a season (common abrev)
-   Returns the ordered indices of the month
+   Returns the ordered indices of the month.
    Author: Krishna Achutarao
    Date: April 2001
+
+   :param my_str: string reperesenting month or season
+   :type my_str: str
+
+   :returns: The ordered indices of the month
+   :rtype: list
    """
    my_str = string.upper(my_str)
    mon_list = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY',
@@ -130,7 +149,15 @@ def getMonthIndex(my_str):
 
 
 def isMonthly(s):
-    '''This function test if the data are monthly data from the time axis'''
+    """
+    This function test if the data are monthly data from the time axis.
+
+    :param s: A cdms2 TransientVariable
+    :type s: cdms2.tvariable.TransientVariable
+
+    :returns: An integer flag indicating whether s has monthly data (1), or does not (0).
+    :rtype: int
+    """
     tim=s.getTime()
     units=tim.units
     monthly=1
@@ -141,18 +168,35 @@ def isMonthly(s):
     return monthly
 
 def mergeTime(ds,statusbar=1,fill_value=1.e20):
-    '''
-    Merge chronologically a bunch of slab
+    """
+    Merge chronologically a bunch of slabs
     Version 1.0
     Author: Charles Doutriaux, doutriaux1@llnl.gov
-    Usage:
-    mymerged=mergeTime(ds)
-    where:
-    ds is a list or an array of slabs to merge, each slab MUST be in chronological order
-    Output:
-    a slab merging all the slab of ds
-    order is the order of the first slab
-    '''
+
+    :Example:
+
+        .. doctest:: times_mergeTime
+
+            >>> import cdms2
+            >>> import vcs
+            >>> vcs.download_sample_data_files()
+            >>> f=cdms2.open(vcs.sampledata + '/clt.nc')
+            >>> clt=f('clt')
+            >>> u=f('u')
+            >>> v=f('v')
+            >>> ds=[clt,u,v]
+            >>> mymerged=mergeTime(ds)
+
+    :param ds: A list or an array of slabs to merge. Each slab MUST be in chronological order.
+    :type ds: list
+    :param statusbar: Integer flag indicating whether to show status bar or not.
+    :type statusbar: int
+    :param fill_value: Float used to set the fill value of the generated slab.
+    :type fill_value: float
+
+    :returns: A slab merging all the slabs of ds. Order is the order of the first slab
+    :rtype: cdms2.tvariable.TransientVariable
+    """
     allNone = True
     for s in ds:
         if s is not None:
@@ -256,13 +300,21 @@ def mergeTime(ds,statusbar=1,fill_value=1.e20):
 
 
 def switchCalendars(t1,u1,c1,u2,c2=None):
-    '''
-    converts a relative time from one calendar to another, assuming that they are in different calendar
-    Usage: cvreltime(t1,c1,u2,c2)
-    where t1 is cdtime reltime object or a value (then u1 is needed)
-    c1,c2 are cdtime calendars
-    u1, u2 the units in the final calendar
-    '''
+    """
+    Converts a relative time from one calendar to another, assuming that they are in different calendars
+
+    :Example:
+
+        .. doctest:: times_switchCalendars
+
+            >>> switchCalendars(t1,c1,u2,c2)
+
+    :param t1: A cdtime reltime object or a value. If it is a value, then u1 is needed.
+    :param c1: cdtime calendar
+    :param c2: cdtime calendar
+    :param u1: units in the calendar to be converted
+    :param u2: units in the final calendar
+    """
     if not (type(t1)==types.IntType or type(t1)==types.FloatType):
       c2=u2
       u2=c1
@@ -278,9 +330,10 @@ def switchCalendars(t1,u1,c1,u2,c2=None):
 
 
 class TimeSlicer:
-    '''
+    """
     Author : Charles Doutriaux: doutriaux1@llnl.gov
     Date: April 2001
+
     Returns masked average of specific time slices
     "slicer" determine which slices of the Transient Variable (TV) are processed
     "criteria" gets TV (with time dimension) and returns a "timeless" mask, used to mask the averaged slices
@@ -350,7 +403,7 @@ class TimeSlicer:
     TS=TimeSlicer(slicerfunc,criteriafunc)
     myres=TS(myslab,[[slicerarg,[criteriaarg]])
     myresdeparture=TS(myslab,[[slicerarg,[criteriaarg,ref]]]
-    '''
+    """
     def __init__(self,slicerfunction=None,criteriafunction=None):
         self.slicer=slicerfunction
         self.criteria=criteriafunction
@@ -359,16 +412,14 @@ class TimeSlicer:
         self.title=''
         
     def get(self,slab,slicerarg=None,criteriaarg=None,statusbar=None,weights=False,sum=False):
-        '''
-    Returns the slices wanted, appropriately masked
-       Input:
-          slab : the slab on which to operate
-          sliceruserargument  : anything your slicer function needs, default is None
-          criteriauserargument: anything your criteria function needs, default is None
-          statusbar=None : statusbar ?
-       Output:
-          out  : averaged and masked slices of slab
-        '''
+        """
+        :param slab: the slab on which to operate
+        :param slicerarg: anything your slicer function needs, default is None
+        :param criteriaarg: anything your criteria function needs, default is None
+        :param statusbar: see :py:func:`statusbar` for details
+
+        :returns: averaged and masked slices of slab
+        """
         
         
         # Makes sure time is first
@@ -439,18 +490,15 @@ class TimeSlicer:
             
 
     def departures(self,slab,slicerarg=None,criteriaarg=None,ref=None,statusbar=None,sum=False):
-        '''
-    Returns the departures of slab from the result of get
-       Input:
-          slab                : slab from which the we want to get the departure
-          sliceruserargument  : anything your slicer function needs, default is None
-          criteriauserargument: anything your criteria function needs, default is None
-          (ref): optional     : result from get or equivalent precomputed
-          statusbar           : statusbar stuff (see statusbar function for details)
-          
-       Output:
-          out : departure of slab from ref
-          '''
+        """
+        :param slab: slab from which the we want to get the departure
+        :param slicerarg: anything your slicer function needs, default is None
+        :param criteriaarg: anything your criteria function needs, default is None
+        :param ref: result from get or equivalent precomputed
+        :param statusbar: see :py:func:`statusbar` for details
+
+        :returns: The departures of slab from the result of get
+        """
         sliced=TimeSlicer.get(self, slab, slicerarg, criteriaarg, statusbar=statusbar, sum=sum)
 
         if sliced is None:
@@ -487,19 +535,18 @@ class TimeSlicer:
         else:
             return out
 
-
     def average(self,slab,slices,bounds,norm,criteriaarg=None,statusbar=None,weights=False,sum=False):
-        '''
-    Return the average of the result of slicer
-       Input:
-          slab                : the slab on which to operate
-          slices              : the slices for each part
-          bounds              : the length of each slice
-          norm                : the actual length of each "season"
-          criteriaarg         : arguments for criteria thing
-       Output:
-          out : the average of slab, masked by criteria
-          '''
+        """
+        Return the average of the result of slicer
+
+        :param slab: the slab on which to operate
+        :param slices: the slices for each part
+        :param bounds: the length of each slice
+        :param norm: the actual length of each "season"
+        :param criteriaarg: arguments for criteria thing
+
+        :returns: the average of slab, masked by criteria
+          """
         n=len(slices)
         sh=list(slab.shape)
         sh[0]=n
@@ -594,20 +641,20 @@ class TimeSlicer:
 
 
 def monthBasedSlicer(tim,arg=None):
-    '''
+    """
     slicer function for the TimeSlicer class
     select months
     Author : Charles Doutriaux, doutriaux1@llnl.gov
     Original Date: April 2001
     Last Modified: October, 2001
     Input:
-      - tim: time axis
-      - arg: character string representing the desired month/season or integer(s)
+    :param tim: time axis
+    :param arg: character string representing the desired month/season or integer(s)
              also you can pass a list of the months you want (string or integer)
              you can mix integer and strings
     Output:
       - 
-    '''
+    """
     # First convert the input
     if not type(arg) in [types.ListType , types.TupleType]:
         arg=[arg]
@@ -741,21 +788,21 @@ def monthBasedSlicer(tim,arg=None):
 
 
 def dayBasedSlicer(tim,arg=None):
-    '''
+    """
     slicer function for the TimeSlicer class
     select days
     Author : Charles Doutriaux, doutriaux1@llnl.gov
     Original Date: June, 2003
-    Last Modified: ...
-    Input:
-      - tim: time axis
-      - arg: character string representing the desired day/days or day number(s) (jan 1st, is day 0, feb 29th is day 59.5...)
+
+    :param tim: time axis
+    :param arg: string representing the desired day/days or day number(s) (jan 1st, is day 0, feb 29th is day 59.5...)
              day are represented as "Jan-01" "January-01" "jan-1", "1-january", case does not matter
-             days can be represented by 2 number but then month is assumed to be first ! e.g "01-25" = "jan-25"
+             days can be represented by 2 numbers but then month is assumed to be first ! e.g "01-25" = "jan-25"
              you can mix definitions
+    :type arg: str
     Output:
       - 
-    '''
+    """
     # First convert the input
     if not type(arg) in [types.ListType , types.TupleType]:
         arg=[arg]
@@ -927,28 +974,28 @@ def weekday(a,calendar=None):
 
 
 def generalCriteria(slab,mask,spread,arg):
-    '''
+    """
     Default Conditions:
-      50% of the data
-      AND 
-      Centroid < x (in absolute value), centroid is always between 0 (perfect and 1, none perfect)
-      by default centroid is not used
-      
+        50% of the data
+        AND
+        Centroid < x (in absolute value), centroid is always between 0 (perfect) and 1, (not perfect)
+        by default centroid is not used
+
     Author: Charles Doutriaux, doutriaux1@llnl.gov
 
     Usage:
         generalCriteria(slab,sliced,slices,arg)
-        slab : the original slab
-        mask:  the actual percentage of data in each subset used to produce the slab
-               the bounds of its first (time) dimension must be correct
-               they will be used by centroid
-        spread: the begining and end time of the slice processed 
-        arg:
+    :param slab: the original slab
+    :param mask: the actual percentage of data in each subset used to produce the slab
+            the bounds of its first (time) dimension must be correct
+            they will be used by centroid
+    :param spread: the begining and end time of the slice processed
+    :param arg: A list of arguments
             First represent the % of value present to retain a slice
             Second represent the value of the centroid (between 0: perfect and 1: bad
             If you do not want to use one these criteria pass None
-            if you would rather use a cyclicalcnetroid pass: "cyclical" as an Xtra argument
-    '''
+            if you would rather use a cyclicalcnetroid pass: "cyclical" as an extra argument
+    """
     # Reads the arguments
     slab=MV2.asVariable(slab)
     sh=slab.shape
@@ -982,8 +1029,10 @@ def generalCriteria(slab,mask,spread,arg):
         slab=numpy.ma.masked_where(numpy.ma.greater_equal(c,centro),slab)
     return slab
 
+
 def setAxisTimeBoundsDaily(axis,frequency=1):
-    """ Sets the bounds correctly for the time axis (beginning to end of day)
+    """
+    Sets the bounds correctly for the time axis (beginning to end of day)
     Usage:
     tim=s.getTime()
     cdutil.times.setAxisTimeBoundsMonthly(tim,frequency=1)
@@ -1019,8 +1068,10 @@ def setAxisTimeBoundsDaily(axis,frequency=1):
     tim.setBounds(bnds)
     return
 
+
 def setSlabTimeBoundsDaily(slab,frequency=1):
-    """Sets the bounds correctly for the time axis (beginning to end of day)
+    """
+    Sets the bounds correctly for the time axis (beginning to end of day)
     for 'frequency'-daily data
     Usage:
     cdutil.times.setSlabTimeBoundsDaily(slab,frequency=1)
@@ -1033,8 +1084,10 @@ def setSlabTimeBoundsDaily(slab,frequency=1):
     setAxisTimeBoundsDaily(tim,frequency=frequency)
     return
 
+
 def setTimeBoundsDaily(obj,frequency=1):
-    """Sets the bounds correctly for the time axis (beginning to end of day)
+    """
+    Sets the bounds correctly for the time axis (beginning to end of day)
     for 'frequency'-daily data
     Usage:
     cdutil.times.setSlabTimeBoundsDaily(slab,frequency=1)
@@ -1051,8 +1104,10 @@ def setTimeBoundsDaily(obj,frequency=1):
         setSlabTimeBoundsDaily(obj,frequency=frequency)
     return
 
+
 def setAxisTimeBoundsMonthly(axis,stored=0):
-    """ Sets the bounds correctly for the time axis (beginning to end of month)
+    """
+    Sets the bounds correctly for the time axis (beginning to end of month)
     Set stored to 1 to indicate that your data are stored at the end of the month
     Usage:
     tim=s.getTime()
@@ -1085,16 +1140,18 @@ def setAxisTimeBoundsMonthly(axis,stored=0):
     tim.setBounds(bnds)
     return
 
+
 def setSlabTimeBoundsMonthly(slab,stored=0):
     """ Sets the bounds correctly for the time axis for monthly data stored
     without bounds.
     Set stored to 1 to indicate that your data are stored at the end of the month
     Usage:
     cdutil.times.setSlabTimeBoundsMonthly(slab,stored=0)
-"""
+    """
     tim=slab.getTime()
     setAxisTimeBoundsMonthly(tim,stored=stored)
     return
+
 
 def setTimeBoundsMonthly(obj,stored=0):
     """ Sets the bounds correctly for the time axis (beginning to end of month)
@@ -1137,6 +1194,7 @@ def setAxisTimeBoundsYearly(axis):
     tim.setBounds(bnds)
     return
 
+
 def setSlabTimeBoundsYearly(slab):
     """ Sets the bounds correctly for the time axis for yearly data
     Usage:
@@ -1145,6 +1203,7 @@ def setSlabTimeBoundsYearly(slab):
     tim=slab.getTime()
     setAxisTimeBoundsYearly(tim)
     return
+
 
 def setTimeBoundsYearly(obj):
     """ Sets the bounds correctly for the time axis for yearly data
@@ -1269,14 +1328,14 @@ class Seasons(ASeason):
                del(slab.__saved_time__)
 
     def get(self,slab,slicerarg=None,criteriaarg=None,statusbar=None,sum=False):
-        '''Get the seasons asked for and return them in chronological order
+        """Get the seasons asked for and return them in chronological order
         i.e. if you asked for DJF and JJA and the first season of your dataset is JJA you will have a JJA first !!!!
         Check your time axis coordinate !!!
         slicerarg will be ignored
         it is recomended to use Season(slab,criteria=mycriteriaarguments) syntax
         rather than Season(slab,None,None,mycriteriaarguments)
         Now for the original doc of the get function see get2__doc__:
-        '''
+        """
         cdat_info.pingPCMDIdb("cdat","cdutil.times.Seasons.get -%s-" % self.seasons)
         u=self.month_fix(slab)
         s=[]
@@ -1295,12 +1354,12 @@ class Seasons(ASeason):
         return m
 
     def departures(self,slab,slicerarg=None,criteriaarg=None,ref=None,statusbar=None,sum=False):
-        ''' Return the departures for the list of season you specified, returned in chronological order
+        """ Return the departures for the list of season you specified, returned in chronological order
         i.e. if you asked for DJF and JJA and the first season of your dataset is JJA you will have a JJA first !!!!
         Check your time axis coordinate !!!
         To pass a specific array from which to compute departures, please pass 1 per season (or None if we should compute it)
         for info one default departures see: departures2.__doc__
-        '''
+        """
         cdat_info.pingPCMDIdb("cdat","cdutil.times.Seasons.departures -%s-" % self.seasons)
         u=self.month_fix(slab)
         if not cdms2.isVariable(ref) and ref is not None:
@@ -1345,17 +1404,19 @@ class Seasons(ASeason):
         return m
                                     
     def climatology(self,slab,criteriaarg=None,criteriaargclim=None,statusbar=None,sum=False):
-        ''' Compute the climatology from a slab
-        Input:
-          slab
-          criteriaarg     : the argument for criteria function when slicing the season (and clim)
-          criteriaargclim : the argument for criteria function when averaging the seasons together
+        """ Compute the climatology from a slab
+
+        :param slab: A cdms2 transient variable
+        :type slab: cdms2.tvariable.TransientVariable
+
+        :param criteriaarg: the argument for criteria function when slicing the season (and clim)
+        :param criteriaargclim: the argument for criteria function when averaging the seasons together
                             if different from criteriarg
-        Output:
-          The Average of the seasons in the order passed when constructing it
-          i.e if DJF and JJA are asked, the output will have the average DJF first, then the average JJA
-          2 criteria can be passed one for the slicing part and one for the climatology part
-        '''
+
+        :returns: The Average of the seasons in the order passed when constructing it
+            i.e if DJF and JJA are asked, the output will have the average DJF first, then the average JJA
+            2 criteria can be passed one for the slicing part and one for the climatology part
+        """
         cdat_info.pingPCMDIdb("cdat","cdutil.times.Seasons.climatology -%s-" % self.seasons)
         u=self.month_fix(slab)
         #if criteriaargclim is None: criteriaargclim=criteriaarg
@@ -1455,4 +1516,3 @@ NOV=Seasons('NOV')
 DEC=Seasons('DEC')
 
 YEAR=Seasons('JFMAMJJASOND')
-
