@@ -162,11 +162,10 @@ def isMonthly(s):
     units=tim.units
     monthly=1
     for i in range(len(tim)-1):
-      month1=cdtime.reltime(tim[i],units).torel('months since 2000').value
-      month2=cdtime.reltime(tim[i+1],units).torel('months since 2000').value
+      month1=cdtime.reltime(tim[i],units).torel('months since 2000',tim.getCalendar()).value
+      month2=cdtime.reltime(tim[i+1],units).torel('months since 2000',tim.getCalendar()).value
       if month2-month1!=1 : monthly=0
     return monthly
-
 
 def mergeTime(ds,statusbar=1,fill_value=1.e20):
     """
@@ -500,7 +499,7 @@ class TimeSlicer:
 
         :returns: The departures of slab from the result of get
         """
-        sliced=TimeSlicer.get(self,slab,slicerarg,criteriaarg,statusbar=statusbar,sum=sum)
+        sliced=TimeSlicer.get(self, slab, slicerarg, criteriaarg, statusbar=statusbar, sum=sum)
 
         if sliced is None:
             return None
@@ -509,17 +508,20 @@ class TimeSlicer:
         
         if order[0]!='t' : sliced=sliced(order='t...')
         order2=sliced.getOrder(ids=1)
+        weights = self.slicer(sliced.getTime(), slicerarg)
         if ref is None:
             if sum is False:
-                ref=numpy.ma.average(sliced,0)
+                ref = numpy.ma.average(sliced, axis=0, weights=zip(*weights[2])[0])
             else:
-                ref = numpy.ma.sum(sliced,0)
+                ref = numpy.ma.sum(sliced, axis=0, weights=zip(*weights[2])[0])
         elif len(order2[1:])>0:
             ref=ref(order=order2[1:])
+
         if cdms2.isVariable(ref):
             out=cdms2.asVariable(sliced(raw=1)-ref(raw=1))
         else:
             out=cdms2.asVariable(sliced(raw=1)-ref)
+
         # put the axes back
         out.id=slab.id
         for i in range(len(sliced.shape)):
@@ -820,7 +822,7 @@ def dayBasedSlicer(tim,arg=None):
                         subarg='feb-29'
                     else:
                         t=cdtime.reltime(index,'month since 1997')
-                        t=t.tocomp()
+                        t=t.tocomp(tim.getCalendar())
                         subarg=str(t.month)+'-'+str(t.day)
                 except:
                     raise Exception,"Error, dayBasedSlicer args must have '-' or '/' as month/day separator"

@@ -223,7 +223,7 @@ class DomainComponent(SelectorComponent):
                         ax.designateLatitude()
                     faxes[axismap[i]]=ax
 
-        a=cdms.createVariable(fetched.filled(),mask=fetched.mask,axes=faxes)
+        a=cdms.createVariable(fetched.filled(),mask=fetched.mask,axes=faxes,attributes=fetched.attributes)
         return a                        
                         
 def domain(*args, **kargs):
