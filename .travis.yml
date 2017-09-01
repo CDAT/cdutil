@@ -18,7 +18,6 @@ script:
 - echo $TRAVIS_EVENT_TYPE
 - echo $TRAVIS_PULL_REQUEST
 - python setup.py install 
-- pip install dropbox
-- python run_tests.py --dropbox -v2
+- python run_tests.py -v2
 after_success:
     - if [ "$TRAVIS_BRANCH" == "master" -a "$TRAVIS_PULL_REQUEST" == "false" ]; then conda install conda-build && conda install anaconda-client && bash scripts/conda_upload.sh ; fi
