@@ -1,5 +1,4 @@
 os:
-    - osx
     - linux
 sudo: false
 before_install:
