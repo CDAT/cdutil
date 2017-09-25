@@ -210,7 +210,7 @@ def generateLandSeaMask(target,source=None,threshold_1 = .2, threshold_2 = .3,re
         mask2 = improve(mask,navy_frac_t,threshold_1,threshold_2,UL,UC,UR,ML,MR,LL,LC,LR,regridTool=regridTool)
         if MV2.allequal(mask2,mask) or i>25: # shouldn't be more than 10 at max, 25 is way safe
             cont=False
-        mask=mask2
+        mask=mask2.astype("i")
         i+=1
     mask.id='sftlf'
     return mask
