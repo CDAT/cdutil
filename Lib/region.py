@@ -37,7 +37,7 @@ class DomainComponent(SelectorComponent):
             s+=')\n'
         if self.kargs!={}:
             s+='Keywords:\n'
-            for k in self.kargs.keys():
+            for k in list(self.kargs.keys()):
                 s+='\t'+str(k)+':'+str(self.kargs[k])+'\n'
         return s
     
@@ -61,12 +61,12 @@ class DomainComponent(SelectorComponent):
                     if specs[0] is None:
                         tmp=axes[i].getBounds()
                         if tmp is None:
-                            raise ValueError, 'Region error, axis:'+axes[i].id+' has no bounds'
+                            raise ValueError('Region error, axis:'+axes[i].id+' has no bounds')
                         specs[0]=minimum(minimum(tmp[0],tmp[-1]))
                     if specs[1] is None:
                         tmp=axes[i].getBounds()
                         if tmp is None:
-                            raise ValueError, 'Region error, axis:'+axes[i].id+' has no bounds'
+                            raise ValueError('Region error, axis:'+axes[i].id+' has no bounds')
                         specs[1]=maximum(maximum(tmp[0],tmp[-1]))
                     if axes[i].isTime(): # Time is as always "Special"
                         import cdtime
@@ -87,7 +87,7 @@ class DomainComponent(SelectorComponent):
                     sp=[specs[0],specs[1],'oob']  # Now retrieve the values wide enough for the exact                    specification[i]=sp  # sets the specifications
             else:
                 return 1
-        for kw in self.kargs.keys():
+        for kw in list(self.kargs.keys()):
             axis=None
             for i in range(len(axes)):
                 if axes[i].id==kw : axis=i
@@ -118,12 +118,12 @@ class DomainComponent(SelectorComponent):
                         if specs[0] is None:
                             tmp=axes[axis].getBounds()
                             if tmp is None:
-                                raise ValueError, 'Region error, axis:'+axes[axis].id+' has no bounds'
+                                raise ValueError('Region error, axis:'+axes[axis].id+' has no bounds')
                             specs[0]=minimum(minimum(tmp[0],tmp[-1]))
                         if specs[1] is None:
                             tmp=axes[axis].getBounds()
                             if tmp is None:
-                                raise ValueError, 'Region error, axis:'+axes[axis].id+' has no bounds'
+                                raise ValueError('Region error, axis:'+axes[axis].id+' has no bounds')
                             specs[1]=maximum(maximum(tmp[0],tmp[-1]))
                         if axes[axis].isTime():
                             import cdtime
@@ -167,7 +167,7 @@ class DomainComponent(SelectorComponent):
                     ax=faxes[axismap[i]].clone()  # retrieve the axis and clones it
                     bounds=ax.getBounds()
                     if bounds is None:
-                        raise ValueError, 'Region error, axis:'+ax.id+' has no bounds'
+                        raise ValueError('Region error, axis:'+ax.id+' has no bounds')
                     ax0=ax[0]
                     ax1=ax[-1]
                     """sets xb with the bounds

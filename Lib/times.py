@@ -1,8 +1,13 @@
 # Adapted for numpy/ma/cdms2 by convertcdms.py
 import numpy
 import MV2
-import cdms2,cdtime,string,types,numpy.ma,sys
+import cdms2,cdtime,types,numpy.ma,sys
 import cdat_info
+
+try:
+    basestring
+except NameError:
+    basestring = str
 
 def centroid(msk,bounds,coords=None):
     """
@@ -87,8 +92,8 @@ def cyclicalcentroid(s,bounds,coords=None):
 
 def getMonthString(my_list):
     """Given a list of months creates the string representing the sequence"""
-    if not type(my_list) in [types.ListType,types.TupleType]:
-        my_list=[my_list]
+    if not isinstance(my_list, (list,tuple)):
+        my_list=[my_list,]
     dic = {
         1:'JANUARY',2:'FEBRUARY',3:'MARCH',
         4:'APRIL',5:'MAY',6:'JUNE',
@@ -98,7 +103,7 @@ def getMonthString(my_list):
     for i in my_list:
         out.append(dic[i][0])
     if len(out)==1: out=[dic[my_list[0]]]
-    return string.join(out,'')
+    return "".join(out)
     
 def getMonthIndex(my_str):
    """
@@ -113,7 +118,7 @@ def getMonthIndex(my_str):
    :returns: The ordered indices of the month
    :rtype: list
    """
-   my_str = string.upper(my_str)
+   my_str = my_str.upper()
    mon_list = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY',
                'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER']
    if my_str in mon_list:
@@ -131,7 +136,7 @@ def getMonthIndex(my_str):
    #   i.e. 'JA' -> July AND August  (NOT January!)
    if len(my_str) >= 3:
        for mon in mon_list:
-           if string.find(mon,  my_str) != -1:
+           if mon.find(my_str) != -1:
                return [mon_list.index(mon)+1]
            # end of if string.find(mon,  my_str) != -1:
        # end of for mon in mon_list:
@@ -139,10 +144,10 @@ def getMonthIndex(my_str):
    yr = 'JFMAMJJASOND'
    yrs = yr+yr
    #
-   result = string.find(yrs, my_str)
+   result = yrs.find(my_str)
    if result == -1: return []
    month =  result + 1
-   lis = range(month, month+len(my_str))
+   lis = list(range(month, month+len(my_str)))
    for i in range(len(lis)):
        if lis[i] > 12: lis[i] -= 12
    return lis
@@ -239,7 +244,7 @@ def mergeTime(ds,statusbar=1,fill_value=1.e20):
             errtime=cdtime.reltime(vals[i],'seconds since 2000').tocomp()
             err='Error in merging process : duplicate time point\n'
             err=err+str(errtime)+' is duplicated, cannot merge'+str(vals[i-2:i+3])
-            raise Exception,err
+            raise Exception(err)
 
     # Now create the big array that will be the merged
     sh=list(ds[0].shape)
@@ -264,7 +269,7 @@ def mergeTime(ds,statusbar=1,fill_value=1.e20):
         try:  # In order to speeed up, raise an execption to exit the inner loops
             for i in range(nslab):
                 tim=times[i]
-                for it in numpy.sort(timesleft[i].keys()):
+                for it in numpy.sort(list(timesleft[i].keys())):
                     t=tim[it]
                     val=timesleft[i][it]
                     if val.value==vals[v]:
@@ -315,7 +320,7 @@ def switchCalendars(t1,u1,c1,u2,c2=None):
     :param u1: units in the calendar to be converted
     :param u2: units in the final calendar
     """
-    if not (type(t1)==types.IntType or type(t1)==types.FloatType):
+    if not (type(t1)==int or type(t1)==float):
       c2=u2
       u2=c1
       c1=u1
@@ -430,7 +435,9 @@ class TimeSlicer:
         # retrieve the time axis
         tim=slab.getTime()
         # Let slicer figure out wich slices we want
+        print("CALLING SLICER")
         slices,bounds,norm=self.slicer(tim,slicerarg)
+        print("PASSED SLICER")
 ##         print 'Slices:',slices,len(slices)
 ##         print 'Bounds:',bounds
 ##         print 'Norm:',norm
@@ -511,9 +518,9 @@ class TimeSlicer:
         weights = self.slicer(sliced.getTime(), slicerarg)
         if ref is None:
             if sum is False:
-                ref = numpy.ma.average(sliced, axis=0, weights=zip(*weights[2])[0])
+                ref = numpy.ma.average(sliced, axis=0, weights=list(zip(*weights[2]))[0])
             else:
-                ref = numpy.ma.sum(sliced, axis=0, weights=zip(*weights[2])[0])
+                ref = numpy.ma.sum(sliced, axis=0, weights=list(zip(*weights[2]))[0])
         elif len(order2[1:])>0:
             ref=ref(order=order2[1:])
 
@@ -656,12 +663,12 @@ def monthBasedSlicer(tim,arg=None):
       - 
     """
     # First convert the input
-    if not type(arg) in [types.ListType , types.TupleType]:
+    if not type(arg) in [list , tuple]:
         arg=[arg]
     # Now convert the strings and add to the valid months
     months=[]
     for i in range(len(arg)):
-        if type(arg[i])==types.StringType:
+        if isinstance(arg[i], basestring):
             vals=getMonthIndex(arg[i])
             for j in vals: months.append(j)
         else:
@@ -675,21 +682,29 @@ def monthBasedSlicer(tim,arg=None):
     bnds=tim.getBounds()
     cal=tim.getCalendar()
     units=tim.units
+    print("UNITS FOUND:",units)
+    print("BOUNDS:",bnds)
     nt=len(tim)
     for i in range(nt):
+        print("I:",i)
+        print("BNDS",bnds[i])
         b0=cdtime.reltime(bnds[i][0],units)
+        print("BNDS, uni",bnds[i],units)
         b1=cdtime.reltime(bnds[i][1],units)
         iout=0
         # Now figures out what the length of
         # the requested season
+        print("BS:",b0,b1)
         b=b0.tocomp(cal)
         yr=b.year
+        print("MONTHS:",months,b)
         if months[-1]==12:
             bb=cdtime.comptime(b.year+1)
         else:
             bb=cdtime.comptime(b.year,months[-1]+1)
 ##         if b.cmp(bb)>0:
 ##             yr=yr+1
+        print("BB:",bb,units)
         # do we span 2 years ?
         if months[0]>months[-1] : # yes
             ## Are we in the part before the year's end
@@ -701,25 +716,36 @@ def monthBasedSlicer(tim,arg=None):
                 t0=cdtime.comptime(yr,months[0])
                 t1=cdtime.comptime(yr+1,months[-1]+1)              
         else:
+            print("IN ELSE")
             t0=cdtime.comptime(yr,months[0])
+            print("T0",t0)
             if months[-1]!=12:
                 t1=cdtime.comptime(yr,months[-1]+1)
             else:
                 t1=cdtime.comptime(yr+1)
+        print("t1:",t1)
         if t0.cmp(b1.tocomp(cal))>0:
             t1=t1.add(-1,cdtime.Year)
             t0=t0.add(-1,cdtime.Year)
+        print("t1b:",t1)
         if t1.cmp(b0.tocomp(cal))<0:
             t1=t1.add(1,cdtime.Year)
             t0=t0.add(1,cdtime.Year)
+        print("t1c:",t1,units)
         t1=t1.torel(units,cal)
+        print("t1d:",t1,units)
 ##         if i<5:print 't1 after:',t1.tocomp(cal)
         t0=t0.torel(units,cal)
+        print("t0d:",t0,units)
         lenseas=float(t1.value-t0.value)
+        print("COMPARISON",t0,b0)
+        print("RES:",t0.cmp(b0))
+        print("COMPARISON2")
         # Now checks if we overlap the season
 ##         if i<5: print '---',i,b0.tocomp(cal),b1.tocomp(cal),t0.tocomp(cal),t1.tocomp(cal)
 ##         if i<5: print '---',i,t0.cmp(b0),b1.cmp(t1),t1.cmp(b0)
         if t0.cmp(b0)>-1:        # cell starts after season started
+            print("IN IF")
             if b1.cmp(t1)>=0 :    # and ends before the season ends
                 sub.append(i)
                 subb.append([t0.value,t1.value])
@@ -736,6 +762,7 @@ def monthBasedSlicer(tim,arg=None):
 
         elif t1.cmp(b0)==1:      # end season after beginning of cell ?
 ##             print 'index,t1>b0 time',i,tim[i],t1.tocomp(),b0.tocomp(),b
+            print("IN ELSE")
             if b1.cmp(t1)>0:             # and ends after the end
                 sub.append(i)
                 subb.append([b0.value,t1.value])
@@ -804,20 +831,20 @@ def dayBasedSlicer(tim,arg=None):
       - 
     """
     # First convert the input
-    if not type(arg) in [types.ListType , types.TupleType]:
+    if not type(arg) in [list , tuple]:
         arg=[arg]
     # Now convert the strings and add to the valid month/day tupples
     tupples=[]
     for i in range(len(arg)):
         subarg=arg[i]
-        if type(subarg)!=types.StringType:
-            raise Exception,"Error, arguments to dayBasedSlicer must be strings"
-        sp=string.split(subarg,"-")
+        if isinstance(subarg, basestring):
+            raise Exception("Error, arguments to dayBasedSlicer must be strings")
+        sp=subarg.split("-")
         if sp[0]==subarg:
-            sp=string.split(subarg,'/')
+            sp=subarg.split('/')
             if sp[0]==subarg:
                 try:
-                    index=string.atof(subarg)
+                    index=float(subarg)
                     if index==59.5:
                         subarg='feb-29'
                     else:
@@ -825,22 +852,22 @@ def dayBasedSlicer(tim,arg=None):
                         t=t.tocomp(tim.getCalendar())
                         subarg=str(t.month)+'-'+str(t.day)
                 except:
-                    raise Exception,"Error, dayBasedSlicer args must have '-' or '/' as month/day separator"
+                    raise Exception("Error, dayBasedSlicer args must have '-' or '/' as month/day separator")
         try:
-            day=string.atoi(sp[1])
+            day=int(sp[1])
             try:
                 month=getMonthIndex(sp[0])
             except:
-                month=string.atoi(sp[0])
+                month=int(sp[0])
         except:
             try:
-                day=string.atoi(sp[0])
+                day=int(sp[0])
                 try:
                     month=getMonthIndex(sp[1])
                 except:
-                    month=string.atoi(sp[1])
+                    month=int(sp[1])
             except:
-                raise Exception,"Error dayBasedSlicer couldn't understand argument: "+subarg
+                raise Exception("Error dayBasedSlicer couldn't understand argument: "+subarg)
         tupples.append([day,month])
     slices=[]
     bounds=[]
@@ -1043,7 +1070,7 @@ def setAxisTimeBoundsDaily(axis,frequency=1):
     """
     tim=axis
     if not tim.isTime():
-        raise ValueError,'Time Axis only please !'
+        raise ValueError('Time Axis only please !')
     if tim is None:
         return
     units=tim.units
@@ -1115,7 +1142,7 @@ def setAxisTimeBoundsMonthly(axis,stored=0):
     """
     tim=axis
     if not tim.isTime():
-        raise ValueError,'Time Axis only please !'
+        raise ValueError('Time Axis only please !')
     if tim is None:
         return
     units=tim.units
@@ -1289,13 +1316,13 @@ class ASeason(TimeSlicer):
 
 class Seasons(ASeason):
     def __init__(self,*seasons):
-        self.__call__=self.get
+        print("SEASON INITIATED WITH:",seasons)
         if len(seasons)==1:
             seasons=seasons[0]
-        if type(seasons)==types.StringType:
+        if isinstance(seasons, basestring):
             seasons=[seasons]
         for i in range(len(seasons)):
-            if type(seasons[i]) in [types.ListType,types.TupleType,types.IntType]:
+            if type(seasons[i]) in [list,tuple,int]:
                 seasons[i]=getMonthString(seasons[i])
         self.seasons=seasons
         self.slicer=monthBasedSlicer
@@ -1353,6 +1380,8 @@ class Seasons(ASeason):
         self.month_restore(m,slab)
         return m
 
+    __call__ = get
+
     def departures(self,slab,slicerarg=None,criteriaarg=None,ref=None,statusbar=None,sum=False):
         """ Return the departures for the list of season you specified, returned in chronological order
         i.e. if you asked for DJF and JJA and the first season of your dataset is JJA you will have a JJA first !!!!
@@ -1363,7 +1392,7 @@ class Seasons(ASeason):
         cdat_info.pingPCMDIdb("cdat","cdutil.times.Seasons.departures -%s-" % self.seasons)
         u=self.month_fix(slab)
         if not cdms2.isVariable(ref) and ref is not None:
-            raise RuntimeError,"reference must be a variable (MV2)"
+            raise RuntimeError("reference must be a variable (MV2)")
         s=[]
         # Loop through the seasons
         self.departures_seasons=[]
@@ -1386,7 +1415,7 @@ class Seasons(ASeason):
                     ref = ref(order='t...')
                 if ref.shape[0]!=len(self.departures_seasons):
                     self.seasons=self.departures_seasons
-                    raise ValueError,"The reference time (or first) dimension does not match the number of dimensions"
+                    raise ValueError("The reference time (or first) dimension does not match the number of dimensions")
                 newref=ref[i]
             else:
                 newref=None

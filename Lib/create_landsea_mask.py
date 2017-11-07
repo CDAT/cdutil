@@ -190,16 +190,16 @@ def generateLandSeaMask(target,source=None,threshold_1 = .2, threshold_2 = .3,re
     if cdms2.isVariable(target):
         target = target.getGrid()
         if target is None:
-            raise Exception,"Error target data passed do not have  a grid"
+            raise Exception("Error target data passed do not have  a grid")
     if not isinstance(target,cdms2.grid.TransientRectGrid):
-        raise Exception, "Error: target grid must be rectilinear"
+        raise Exception("Error: target grid must be rectilinear")
 
     if source is None:
         source = cdms2.open(os.path.join(cdat_info.get_prefix(),'share','cdutil','navy_land.nc'))('sftlf')
         
     try:
         navy_frac_t = source.regrid(target,regridTool='regrid2')
-    except Exception,err:
+    except Exception as err:
         raise "error, cannot regrid source data to target, got error message: %s" % err
     
     mask = MV2.greater(navy_frac_t,.5).astype('i') # First guess, anything greater than 50% is land

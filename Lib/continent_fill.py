@@ -24,7 +24,7 @@ class Gcf:
 
     def readData(self):
         """This function reads the continents outline"""
-        import worldmap
+        from . import worldmap
         xs=[]
         ys=[]
         for area in dir(worldmap):
@@ -146,8 +146,8 @@ class Gcf:
                 x.plot(li3,bg=bg)
     ##         x.viewport=ovp
     ##         x.worldcoordinate=owc
-        except Exception,err:
-            print 'Error in continents:',err
+        except Exception as err:
+            print('Error in continents:',err)
 
 if __name__ == '__main__':
     import os,sys,cdutil,vcs,cdms2 as cdms

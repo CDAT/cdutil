@@ -38,7 +38,7 @@ def loop(potential,potential_reg,c2,w3,region):
     return
 
 
-def generateSurfaceTypeByRegionMask(mask,sftbyrgn=None,sftbyrgnmask=215,regions=range(201,223),maximum_regions_per_cell=4,extend_up_to=3,verbose=True):
+def generateSurfaceTypeByRegionMask(mask,sftbyrgn=None,sftbyrgnmask=215,regions=list(range(201,223)),maximum_regions_per_cell=4,extend_up_to=3,verbose=True):
     """
     Maps a "regions" dataset onto a user provided land/sea mask or grid
     
@@ -77,7 +77,7 @@ def generateSurfaceTypeByRegionMask(mask,sftbyrgn=None,sftbyrgnmask=215,regions=
         sftbyrgn = cdms2.open(os.path.join(cdat_info.get_prefix(),'share','cdutil','sftbyrgn.nc'))('sftbyrgn')
         
     if regions is None:
-        if verbose: print 'Preparing regions'
+        if verbose: print('Preparing regions')
         #regions = range(201,223)
 
         regions = []
@@ -86,7 +86,7 @@ def generateSurfaceTypeByRegionMask(mask,sftbyrgn=None,sftbyrgnmask=215,regions=
             c = float(MV2.sum(MV2.ravel(MV2.equal(sftbyrgn,i)),0))
             if c != 0: regions.append(i)
 
-    if verbose: print 'Regions:',regions
+    if verbose: print('Regions:',regions)
     ## If no mask passed fr sftbyrgn, assumes everything greater 5000 is land)
     if isinstance(sftbyrgnmask,int):
         split           = sftbyrgnmask
@@ -120,10 +120,10 @@ def generateSurfaceTypeByRegionMask(mask,sftbyrgn=None,sftbyrgnmask=215,regions=
     r1  = regrid2.Horizontal(g1,g2)
     w   = cdutil.area_weights(sftbyrgn)
 
-    if verbose: print 'First pass'
+    if verbose: print('First pass')
     itmp = 0.
-    for ireg in keys.keys():
-        genutil.statusbar(itmp,len(keys.keys())-1)
+    for ireg in list(keys.keys()):
+        genutil.statusbar(itmp,len(list(keys.keys()))-1)
         itmp += 1.
         c       = MV2.equal(sftbyrgn,ireg)
         w2      = 1.-c*w
@@ -140,7 +140,7 @@ def generateSurfaceTypeByRegionMask(mask,sftbyrgn=None,sftbyrgnmask=215,regions=
         sh2[2] = sh[2]+2*(k+1)
         ## Form the possible i/j couples !
         s = MV2.sum(MV2.ravel(MV2.equal(potential[0],-999)),0)
-        if verbose: print 'Expanding up to',k+1,'cells while trying to fix',s,'cells'
+        if verbose: print('Expanding up to',k+1,'cells while trying to fix',s,'cells')
             #if dump:
                 #f=cdms2.open('tmp_'+str(k)+'.nc','w')
                 #f.write(sumregions(potential_reg,potential).astype('f'),id='sftbyrgn',axes=mask.getAxisList())
@@ -160,9 +160,9 @@ def generateSurfaceTypeByRegionMask(mask,sftbyrgn=None,sftbyrgnmask=215,regions=
             for i in range(-k-1,k+2):
                 for j in range(-k-1,k+2):
                     if abs(i)>k or abs(j)>k: couples.append([i,j])
-            ntot = len(keys.keys())*len(couples)-1
+            ntot = len(list(keys.keys()))*len(couples)-1
             itmp = 0
-            for ireg in keys.keys():
+            for ireg in list(keys.keys()):
                 c = MV2.equal(sftbyrgn,ireg)
                 w2 = 1.-c*w
                 s2,w3 = r1(sftbyrgn,mask=w2.filled(),returnTuple=1)

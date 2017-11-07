@@ -19,8 +19,8 @@ def checkStringOrNone(self,name,value):
 
     :returns: If value is None or a string, value is returned. Else, an exception is raised.
     """
-    if not type(value) in [types.StringType,types.NoneType]:
-        raise ValueError,name+' must be a string or None'
+    if not type(value) in [bytes,type(None)]:
+        raise ValueError(name+' must be a string or None')
     return value
 
 
@@ -34,12 +34,12 @@ def checkListNumbers(self,name,value):
     :type value: list or tuple
     :returns: If value contains only numbers, value is returned. Else, an exception is raised.
     """
-    if not type(value) in [types.ListType,types.TupleType,types.NoneType]:
-        raise ValueError, name + ' must be a list/tuple/None'
+    if not type(value) in [list,tuple,type(None)]:
+        raise ValueError(name + ' must be a list/tuple/None')
     if not value is None:
         for v in value:
-            if not type(v) in [types.IntType,types.LongType,types.FloatType]:
-                raise ValueError, name + ' list/tuple elements must be numbers'
+            if not type(v) in [int,int,float]:
+                raise ValueError(name + ' list/tuple elements must be numbers')
     return value
     
 def setSlab(self,name,value):
@@ -56,15 +56,15 @@ def setSlab(self,name,value):
     if isinstance (value,numpy.ndarray ) or numpy.ma.isMA(value):
         self.data=value
         return ('data',value)
-    elif type(value) == types.StringType:
+    elif type(value) == bytes:
         if os.path.exists(value):
             return('file',value)
         else:
-            raise ValueError, value+" : file does not exist...."
-    elif type(value) == types.NoneType:
+            raise ValueError(value+" : file does not exist....")
+    elif type(value) == type(None):
         return name,value
     else:
-        raise ValueError, name+" must be a slab, a file name or None"
+        raise ValueError(name+" must be a slab, a file name or None")
 
 def checkAxisType(self,name,value):
     return checkInStringsListInt(self,name,value,[
@@ -93,15 +93,15 @@ def setGrid(self,name,value):
         self.weightsMaker=None
         return None
     else:
-        raise ValueError, name+" must be a grid object or None"
+        raise ValueError(name+" must be a grid object or None")
         
 def setSlabOnly(self,name,value):
     if isinstance (value,numpy.ndarray ) or numpy.ma.isMA(value):
         return value
-    elif type(value) == types.NoneType:
+    elif type(value) == type(None):
         return value
     else:
-        raise ValueError, name+" must be a slab or None"
+        raise ValueError(name+" must be a slab or None")
     
 def getSlab(self,name):
     value=getattr(self,'_'+name)
@@ -116,7 +116,7 @@ def getSlab(self,name):
         
     if isinstance (value,numpy.ndarray ) or numpy.ma.isMA(value):
         return value
-    elif type(value)==types.StringType:
+    elif type(value)==bytes:
         f=cdms2.open(value)
         if not times is None:
             v=f(self.var,time=times)
@@ -128,13 +128,13 @@ def getSlab(self,name):
         return None
 
 def checkNumberOrNone(self,name,value):
-    if not type(value) in [types.IntType,types.FloatType,types.LongType,types.NoneType]:
-        raise ValueError,name+' must be an integer, a float, or None'
+    if not type(value) in [int,float,int,type(None)]:
+        raise ValueError(name+' must be an integer, a float, or None')
     return value
 
 def checkIntOrNone(self,name,value):
-    if not type(value) in [types.IntType,types.LongType,types.NoneType]:
-        raise ValueError,name+' must be an integer or None'
+    if not type(value) in [int,int,type(None)]:
+        raise ValueError(name+' must be an integer or None')
     return value
 
     
@@ -153,14 +153,14 @@ def checkInStringsList(self,name,value,values):
     :param values: list of strings to search through for value
     :type values: list
     """
-    if not type(value)==types.StringType:
-        raise ValueError, name + 'must be a string'
+    if not type(value)==bytes:
+        raise ValueError(name + 'must be a string')
     elif not string.lower(value) in values:
         err=name+" must be in ('"+values[0]
         for v in values[1:-1]:
             err=err+", '"+v+"'"
         err=err+" or '"+values[-1]+"')"
-        raise ValueError, err
+        raise ValueError(err)
     self._basic_set(name,string.lower(value))
 
 def checkInStringsListInt(self,name,value,values):
@@ -174,7 +174,7 @@ def checkInStringsListInt(self,name,value,values):
     for v in values:
         if not v=='': # skips the invalid/non-contiguous values
             str2=str2+str(i)+', '
-            if type(v) in [types.ListType,types.TupleType]:
+            if type(v) in [list,tuple]:
                 str1=str1+"'"+v[0]+"', "
                 for v2 in v:
                     val.append(v2)
@@ -183,29 +183,29 @@ def checkInStringsListInt(self,name,value,values):
                 str1=str1+"'"+v+"', "
             i=i+1
     err=str1[:-2]+')'+str2[:-2]+')'
-    if type(value)==types.StringType:
+    if type(value)==bytes:
         value=string.lower(value)
         if not value in val:
-            raise ValueError, err
+            raise ValueError(err)
         i=0
         for v in values:
-            if type(v) in [types.ListType,types.TupleType]:
+            if type(v) in [list,tuple]:
                 if value in v:
                     return i
             elif value==v:
                 return i
             i=i+1
-    elif type(value)==types.IntType or (type(value)==types.FloatType and int(value)==value):
+    elif type(value)==int or (type(value)==float and int(value)==value):
         if not value in range(len(values)):
-            raise ValueError, err
+            raise ValueError(err)
         else:
             return int(value)
     else:
-        raise ValueError, err
+        raise ValueError(err)
 
  
 def checkNumber(self,name,value):
-    if not type(value) in [types.IntType,types.FloatType,types.LongType]:
-        raise ValueError,name+' must be an integer or a float'
+    if not type(value) in [int,float,int]:
+        raise ValueError(name+' must be an integer or a float')
     return value
 

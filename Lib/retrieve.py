@@ -1,17 +1,15 @@
 # Adapted for numpy/ma/cdms2 by convertcdms.py
 import types
-import string
 import numpy
 import numpy.ma
 import MV2
 import cdms2
 import regrid2
 import cdtime
-import ValidationFunctions
-import exceptions
+from . import ValidationFunctions
 import genutil
 
-class WeightsMakerError(exceptions.Exception):
+class WeightsMakerError(Exception):
     def __init__(self,args):
         self.args=args
 
@@ -23,6 +21,9 @@ class WeightsMaker(object):
     (in addition to possibly weighting by the area of the grid cell).  In the simplest case, only 0's and 1's will be
     generated, indicating which cells will be masked or not.
     """
+
+    __slots__=['mask','values','actions','file','combiningActions','data','_var']
+
     def __init__(self,source=None,var=None,values=None,actions=[MV2.equal,],combiningActions=[MV2.multiply,]):
         """
         :param source: either a file name or a transient variable.
@@ -63,22 +64,22 @@ class WeightsMaker(object):
             allowing a mask to be generated based on the data itself.  (If, for example, the WeightsMaker is passed
             values=["input", 273.15] and actions=[MV.less], temperatures below freezing would be masked.)
         """
-        if type(source)==types.StringType:
+        if type(source)==bytes:
             self.file=source
             self.mask=None
         else:
             self.mask=source
             self.file=None
-        self.var=var
+        self.variable=var
         self.values=values
         self.actions=actions
         self.combiningActions=combiningActions
 
     def get(self,input=None):
         v=self.mask
-        if type(self.file)==types.StringType:
+        if type(self.file)==bytes:
             f=cdms2.open(self.file)
-            v=f(self.var,squeeze=1)
+            v=f(self.variable,squeeze=1)
             f.close()
 ##         if v is None: return v
         if self.values is None:
@@ -95,7 +96,7 @@ class WeightsMaker(object):
             for iv in range(len(self.values)):
                 val=self.values[iv]
                 comp=v
-                if type(val) in [types.ListType,types.TupleType]:
+                if type(val) in [list,tuple]:
                     if val[0]=='input':
                         val=val[1]
                         comp=input
@@ -114,7 +115,7 @@ class WeightsMaker(object):
         if self.file is None and ((self.mask is None) or (self.mask is MV2.nomask)):
             s+='None'
         else:
-            if not self.file is None: s+='\nfile:'+str(self.file)+'\nVar:'+str(self.var)
+            if not self.file is None: s+='\nfile:'+str(self.file)+'\nVar:'+str(self.variable)
 ##             if not self.data is None: s+='\ndata:'+str(self.data)
             if not ((self.mask is None) or (self.mask is MV2.nomask)): s+='\nmask:'+str(self.mask)
             if not self.values is None:
@@ -130,8 +131,6 @@ class WeightsMaker(object):
                 s+=']\n'
         return s
     
-    __slots__=['mask','var','values','actions','file','combiningActions','data','_var']
-
     def _set_var(self,value):
         self._var=ValidationFunctions.checkStringOrNone(self,'var',value)
 
@@ -140,13 +139,16 @@ class WeightsMaker(object):
 
     def _del_var(self):
         del self._var
-    var=property(_get_var,_set_var)
+    variable=property(_get_var,_set_var)
         
         
 class WeightedGridMakerError(WeightsMakerError):
     pass
 
 class GridAxis(object):
+
+    __slots__=['_first','_n','_delta','_type',]
+
     def __init__(self):
         self.first=None
         self.n=None
@@ -158,9 +160,6 @@ class GridAxis(object):
         s+='delta:'+str(self.delta)+'\n'
         s+='type:'+str(self.type)
         return s
-
-    __slots__=['first','n','delta','type','_first','_n','_delta','_type',]
-
     def _set_first(self,value):
         self._first=ValidationFunctions.checkNumberOrNone(self,'first',value)
     def _get_first(self):
@@ -252,7 +251,7 @@ class WeightedGridMaker(object):
         self.latitude.type=grid_type
         if isinstance(source,cdms2.grid.AbstractGrid):
             self.grid=source
-        elif isinstance(source,(str,unicode)):
+        elif isinstance(source,str):
             self.file=source
             f=cdms2.open(source)
             V=f[var]
@@ -265,8 +264,8 @@ class WeightedGridMaker(object):
         elif weightsMaker is None:
             self.weightsMaker=WeightsMaker()
         else:
-            raise WeightedGridMakerError, "WeightedGridMaker: weightsMaker must be None or WeightsMaker instance, you passed:"+repr(weightsMaker)
-        self.var=var
+            raise WeightedGridMakerError("WeightedGridMaker: weightsMaker must be None or WeightsMaker instance, you passed:"+repr(weightsMaker))
+        self.variable=var
         
     def __str__(self):
         s='GridMaker Object:'
@@ -277,7 +276,7 @@ class WeightedGridMaker(object):
             s+='\nLatitude:\n'+str(self.latitude)
         elif not self.file is None:
             s+='\nFile:'+str(self.file)+'\n'
-            s+='Variable:'+str(self.var)
+            s+='Variable:'+str(self.variable)
         else:
             s+='None'
         s+='\n'+str(self.weightsMaker)
@@ -307,7 +306,7 @@ class WeightedGridMaker(object):
                     value=cdms2.createGenericGrid(lat[:],lon[:],lat.getBounds(),lon.getBounds())
             elif not self.file is None:
                 f=cdms2.open(self.file)
-                value=f[self.var].getGrid()
+                value=f[self.variable].getGrid()
                 ## Ok temporary stuff to try to be able to close the file
                 lat=value.getLatitude()
                 lon=value.getLongitude()
@@ -318,7 +317,7 @@ class WeightedGridMaker(object):
     __call__=get
     
 
-    __slots__=['grid','var','file','longitude','latitude','weightsMaker','_var','_file','_grid']
+    __slots__=['longitude','latitude','weightsMaker','_var','_file','_grid']
 
     def _get_var(self):
         return self._var
@@ -396,7 +395,7 @@ class VariableConditioner(object):
         :type id: str
         """
         self.id=id
-        self.var=var
+        self.variable=var
         self.offset=offset
         self.slope=slope
         if cdmsArguments is None:
@@ -412,7 +411,7 @@ class VariableConditioner(object):
         elif isinstance(weightsMaker,WeightsMaker) or weightsMaker is None:
             self.weightsMaker=weightsMaker
         else:
-            raise VariableConditionerError,"WeightsMaker is wrong"
+            raise VariableConditionerError("WeightsMaker is wrong")
         if weightedGridMaker is None:
             self.weightedGridMaker=WeightedGridMaker()
         elif isinstance(weightedGridMaker,WeightedGridMaker):
@@ -421,7 +420,7 @@ class VariableConditioner(object):
             self.weightedGridMaker=WeightedGridMaker()
             self.weightedGridMaker.grid=weightedGridMaker
             
-        if type(source)==types.StringType :
+        if type(source)==bytes :
             self.file=source
             self.data=None
         else:
@@ -436,7 +435,7 @@ class VariableConditioner(object):
         s+='id:'+str(self.id)
         if not self.file is None:
             s+='\nfile:'+str(self.file)
-            s+='\nvar:'+str(self.var)
+            s+='\nvar:'+str(self.variable)
         else:
             s+='\ndata:'+str(self.data)
         if not self.cdmsArguments is None:
@@ -445,7 +444,7 @@ class VariableConditioner(object):
                 s+=str(a)+', '
         if not self.cdmsKeywords is None:
             s+='\ncdmsKeywords:'
-            for k in self.cdmsKeywords.keys():
+            for k in list(self.cdmsKeywords.keys()):
                 s+='\n\t'+k+':'+str(self.cdmsKeywords[k])
         s+='\n'+str(self.weightsMaker)
         s+='\n'+str(self.weightedGridMaker)
@@ -458,7 +457,7 @@ class VariableConditioner(object):
     def get(self,returnTuple=1):
         value=self.data
         frc=None
-        if type(value) in [types.TupleType, types.ListType]:
+        if type(value) in [tuple, list]:
             value,frc=value
         if isinstance (value,numpy.ndarray ) or numpy.ma.isMA(value): # Variable defined from array
             if frc is None: frc=numpy.ma.ones(value.shape,dtype=numpy.float32)
@@ -468,7 +467,7 @@ class VariableConditioner(object):
             for a in self.cdmsArguments:
                 args.append(a)
             # Add user defined cdmsKeywords
-            for k in self.cdmsKeywords.keys():
+            for k in list(self.cdmsKeywords.keys()):
                 kw[k]=self.cdmsKeywords[k]
             # try to apply, if not forget about it
             try:
@@ -476,11 +475,11 @@ class VariableConditioner(object):
                 frc=frc(*args,**kw)
                 # Now removes the slice types
                 # because they can't be used twice
-                for k in kw.keys():
-                    if type(kw[k])==types.SliceType:
+                for k in list(kw.keys()):
+                    if type(kw[k])==slice:
                         del(kw[k])
                 for i in range(len(args)):
-                    if type(args[i])==types.SliceType:
+                    if type(args[i])==slice:
                         pop(args,i)
                         i=i-1                
             except:
@@ -493,23 +492,23 @@ class VariableConditioner(object):
             for a in self.cdmsArguments:
                 args.append(a)
             # Add user defined cdmsKeywords
-            for k in self.cdmsKeywords.keys():
+            for k in list(self.cdmsKeywords.keys()):
                 kw[k]=self.cdmsKeywords[k]
-            v=f(self.var,*args,**kw)
+            v=f(self.variable,*args,**kw)
             f.close()
             # Now removes the slice types
             # because they can't be used twice
-            for k in kw.keys():
-                if type(kw[k])==types.SliceType:
+            for k in list(kw.keys()):
+                if type(kw[k])==slice:
                     del(kw[k])
             for i in range(len(args)):
-                if type(args[i])==types.SliceType:
+                if type(args[i])==slice:
                     pop(args,i)
                     i=i-1
 
         ## At that stage applied the preprocess function
         if self.preprocess is not None:
-            v=apply(self.preprocess,(v,),self.preprocessKeywords)
+            v=self.preprocess(*(v,), **self.preprocessKeywords)
 
         # Create the fractions
         if frc is None:
@@ -536,7 +535,7 @@ class VariableConditioner(object):
             v,m=genutil.grower(v,m)
             # make sure variable and weights are compatible
             if m.shape != v.shape:
-                raise VariableConditionerError, 'weights and variable have different shapes: weights is '+str(m.shape)+' and grid is '+str(v.shape)
+                raise VariableConditionerError('weights and variable have different shapes: weights is '+str(m.shape)+' and grid is '+str(v.shape))
             # make sure they're on the same grid (in case one starts at 0 and one at -180 for example
 
             if not m.getGrid() is v.getGrid() :
@@ -574,7 +573,7 @@ class VariableConditioner(object):
                 v,m=genutil.grower(v,m)
                 # make sure variable and weights are compatible
                 if m.shape != v.shape:
-                    raise VariableConditionerError, 'weights and variable have different shapes: weights is '+str(m.shape)+' and grid is '+str(v.shape)
+                    raise VariableConditionerError('weights and variable have different shapes: weights is '+str(m.shape)+' and grid is '+str(v.shape))
                 # make sure they're on the same grid (in case one starts at 0 and one at -180 for example
 
                 if not m.getGrid() is v.getGrid() :
@@ -620,7 +619,7 @@ class VariableConditioner(object):
     __call__=get
     
 
-    __slots__=['source','var','data','file','weightsMaker','weightedGridMaker','slope','offset','cdmsArguments','cdmsKeywords','id','preprocessKeywords','preprocess','comments','_var','_id','_slope','_offset','_file','_data','_weightedGridMaker']
+    __slots__=['source','weightsMaker','cdmsArguments','cdmsKeywords','preprocessKeywords','preprocess','comments','_var','_id','_slope','_offset','_file','_data','_weightedGridMaker']
     
     def _get_var(self):
         return self._var
@@ -729,7 +728,7 @@ class VariablesMatcher(object):
                 individual VariableConditioner objects (i.e., "1", "2" and "external").
         :type cdmsKeywords: dict
         """
-        # First  VariableConditioner
+        # First VariableConditioner
         if isinstance(variableConditioner1,VariableConditioner):
             self.variableConditioner1=variableConditioner1
         else:
@@ -782,7 +781,7 @@ class VariablesMatcher(object):
                 setattr(self.EV,'cdmsArguments',self.cdmsArguments)
             
         # overwrite the defintion for the variableConditioners cdmsKeyowrds
-        for k in self.cdmsKeywords.keys():
+        for k in list(self.cdmsKeywords.keys()):
             self.V1.cdmsKeywords[k]=self.cdmsKeywords[k]
             self.V2.cdmsKeywords[k]=self.cdmsKeywords[k]
             if not self.EV is None:
@@ -796,8 +795,8 @@ class VariablesMatcher(object):
         frc2 = None
         autotime = None
         
-        if not self.V1.cdmsKeywords.has_key('time'):
-            if self.V2.cdmsKeywords.has_key('time'):
+        if 'time' not in self.V1.cdmsKeywords:
+            if 'time' in self.V2.cdmsKeywords:
                 d2=self.V2(returnTuple=returnTuple)
                 if returnTuple:
                     t=d2[0].getTime().asComponentTime()
@@ -840,7 +839,7 @@ class VariablesMatcher(object):
                     self.V2.cdmsKeywords['time']=autotime
                     d2=self.V2(returnTuple=returnTuple)
                     del(self.V2.cdmsKeywords['time'])
-        elif not self.V2.cdmsKeywords.has_key('time'):
+        elif 'time' not in self.V2.cdmsKeywords:
             d1=self.V1(returnTuple=returnTuple)
             if returnTuple:
                 t=d1[0].getTime().asComponentTime()
@@ -907,7 +906,7 @@ class VariablesMatcher(object):
         # External variableConditioner ?
         if not self.EV is None:
             ed=None
-            if not self.EV.cdmsKeywords.has_key('time'):
+            if 'time' not in self.EV.cdmsKeywords:
                 t=d1.getTime().asComponentTime()
                 if not t is None: self.EV.cdmsKeywords['time']=(t[0],t[-1])
                 ed=self.EV(returnTuple=1)
