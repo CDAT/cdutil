@@ -43,10 +43,10 @@ def reconstructPressureFromHybrid(ps, A, B, Po):
     p.id = 'P'
     try:
         p.units = ps.units
-    except:
+    except BaseException:
         pass
     t = p.getTime()
-    if not t is None:
+    if t is not None:
         p = p(order='tz...')
     else:
         p = p(order='z...')
@@ -54,8 +54,9 @@ def reconstructPressureFromHybrid(ps, A, B, Po):
 
 
 def linearInterpolation(
-    A, I, levels=[100000, 92500, 85000, 70000, 60000, 50000, 40000,
-                  30000, 25000, 20000, 15000, 10000, 7000, 5000, 3000, 2000, 1000], status=None, axis='z'):
+    A, Idx, levels=[100000, 92500, 85000, 70000, 60000, 50000, 40000,
+                    30000, 25000, 20000, 15000, 10000, 7000, 5000,
+                    3000, 2000, 1000], status=None, axis='z'):
     """
     Linear interpolation to interpolate a field from some levels to another set of levels
     Values below "surface" are masked.
@@ -91,17 +92,17 @@ def linearInterpolation(
     cdat_info.pingPCMDIdb("cdat", "cdutil.vertical.linearInterpolation")
     try:
         nlev = len(levels)  # Number of pressure levels
-    except:
+    except BaseException:
         nlev = 1  # if only one level len(levels) would breaks
         levels = [levels, ]
     order = A.getOrder()
     A = A(order='%s...' % axis)
-    I = I(order='%s...' % axis)
-    sh = list(I.shape)
+    Idx = Idx(order='%s...' % axis)
+    sh = list(Idx.shape)
     nsigma = sh[0]  # number of sigma levels
     sh[0] = nlev
     t = MV2.zeros(sh, typecode=MV2.float32)
-    sh2 = I[0].shape
+    sh2 = Idx[0].shape
     prev = -1
     for ilev in range(nlev):  # loop through pressure levels
         if status is not None:
@@ -115,27 +116,27 @@ def linearInterpolation(
         Ieq = MV2.masked_equal(Iabv, -1)  # Area where Pressure == levels
         for i in range(1, nsigma):  # loop from second sigma level to last one
             a = MV2.greater_equal(
-                I[i],
+                Idx[i],
                 lev)  # Where is the pressure greater than lev
             b = MV2.less_equal(
-                I[i - 1],
+                Idx[i - 1],
                 lev)  # Where is the pressure less than lev
             # Now looks if the pressure level is in between the 2 sigma levels
             # If yes, sets Iabv, Ibel and Aabv, Abel
             a = MV2.logical_and(a, b)
-            Iabv = MV2.where(a, I[i], Iabv)  # Pressure on sigma level Above
+            Iabv = MV2.where(a, Idx[i], Iabv)  # Pressure on sigma level Above
             Aabv = MV2.where(a, A[i], Aabv)  # Array on sigma level Above
             Ibel = MV2.where(
                 a,
-                I[i - 1],
+                Idx[i - 1],
                 Ibel)  # Pressure on sigma level Below
             Abel = MV2.where(a, A[i - 1], Abel)  # Array on sigma level Below
-            Ieq = MV2.where(MV2.equal(I[i], lev), A[i], Ieq)
+            Ieq = MV2.where(MV2.equal(Idx[i], lev), A[i], Ieq)
 
         val = MV2.masked_where(
             MV2.equal(Ibel, -1.), numpy.ones(Ibel.shape) * lev)
-                               # set to missing value if no data below lev if
-                               # there is
+        # set to missing value if no data below lev if
+        # there is
 
         tl = (val - Ibel) / (Iabv - Ibel) * \
             (Aabv - Abel) + Abel  # Interpolation
@@ -151,14 +152,14 @@ def linearInterpolation(
     lvl = cdms2.createAxis(MV2.array(levels).filled())
     cdms2.setAutoBounds(autobnds)
     try:
-        lvl.units = I.units
-    except:
+        lvl.units = Idx.units
+    except BaseException:
         pass
     lvl.id = 'plev'
 
     try:
-        t.units = I.units
-    except:
+        t.units = Idx.units
+    except BaseException:
         pass
 
     ax[0] = lvl
@@ -170,8 +171,9 @@ def linearInterpolation(
 
 
 def logLinearInterpolation(
-    A, P, levels=[100000, 92500, 85000, 70000, 60000, 50000, 40000,
-                  30000, 25000, 20000, 15000, 10000, 7000, 5000, 3000, 2000, 1000], status=None, axis='z'):
+        A, P, levels=[100000, 92500, 85000, 70000, 60000, 50000, 40000,
+                      30000, 25000, 20000, 15000, 10000, 7000, 5000,
+                      3000, 2000, 1000], status=None, axis='z'):
     """
     Log-linear interpolation to convert a field from sigma levels to pressure levels.
     Values below surface are masked.
@@ -206,7 +208,7 @@ def logLinearInterpolation(
     cdat_info.pingPCMDIdb("cdat", "cdutil.vertical.logLinearInterpolation")
     try:
         nlev = len(levels)  # Number of pressure levels
-    except:
+    except BaseException:
         nlev = 1  # if only one level len(levels) would breaks
         levels = [levels, ]
     order = A.getOrder()
@@ -249,8 +251,8 @@ def logLinearInterpolation(
 
         val = MV2.masked_where(
             MV2.equal(Pbel, -1), numpy.ones(Pbel.shape) * lev)
-                               # set to missing value if no data below lev if
-                               # there is
+        # set to missing value if no data below lev if
+        # there is
 
         tl = MV2.log(
             val / Pbel) / MV2.log(
@@ -269,13 +271,13 @@ def logLinearInterpolation(
     cdms2.setAutoBounds(autobnds)
     try:
         lvl.units = P.units
-    except:
+    except BaseException:
         pass
     lvl.id = 'plev'
 
     try:
         t.units = P.units
-    except:
+    except BaseException:
         pass
 
     ax[0] = lvl
@@ -285,5 +287,5 @@ def logLinearInterpolation(
         setattr(t, att, getattr(A, att))
     return t(order=order)
 
-sigma2Pressure = logLinearInterpolation
 
+sigma2Pressure = logLinearInterpolation
