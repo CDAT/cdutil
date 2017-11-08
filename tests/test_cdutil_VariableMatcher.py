@@ -9,12 +9,12 @@ class CDUTIL(unittest.TestCase):
         ref = os.path.join(cdat_info.get_sampledata_path(),'tas_dnm-95a.xml')
         # Reference
         Ref=cdutil.VariableConditioner(ref)
-        Ref.var='tas'
+        Ref.variable='tas'
         Ref.id='JONES'# optional
         # Test
         tst = os.path.join(cdat_info.get_sampledata_path(),'tas_ccsr-95a.xml')
         Tst=cdutil.VariableConditioner(tst)
-        Tst.var='tas'
+        Tst.variable='tas'
         Tst.id='NCEP' #optional
         # Final Grid
         FG=cdutil.WeightedGridMaker()
@@ -51,7 +51,7 @@ class CDUTIL(unittest.TestCase):
         # Reference
         ref = os.path.join(cdat_info.get_sampledata_path(),'tas_dnm-95a.xml')
         Ref=cdutil.VariableConditioner(ref, weightsMaker=M)
-        Ref.var='tas'
+        Ref.variable='tas'
         Ref.id='D1'
         Ref.cdmsKeywords={'time':('1979','1980','co')}
         # Test
@@ -59,12 +59,12 @@ class CDUTIL(unittest.TestCase):
         M=cdutil.WeightsMaker(tstmsk, var='sftlf_ccsr', values=[1.])
         tst = os.path.join(cdat_info.get_sampledata_path(),'tas_ccsr-95a.xml')
         Tst=cdutil.VariableConditioner(tst, weightsMaker=M)
-        Tst.var='tas'
+        Tst.variable='tas'
         Tst.id='D2'
         # External Variable (for the mask)
         ext = ref
         EV=cdutil.VariableConditioner(ext)
-        EV.var='tas'
+        EV.variable='tas'
         EV.id='OUT'
         # Final Grid
         # We need a mask for the final grid
@@ -101,7 +101,7 @@ class CDUTIL(unittest.TestCase):
         # Reference
         ref = os.path.join(cdat_info.get_sampledata_path(),'tas_dnm-95a.xml')
         Ref=cdutil.VariableConditioner(ref, weightsMaker=M)
-        Ref.var='tas'
+        Ref.variable='tas'
         Ref.id='ECMWF'
         Ref.cdmsKeywords={'time':('1979','1980','co')}
 
@@ -121,7 +121,7 @@ class CDUTIL(unittest.TestCase):
         M=cdutil.WeightsMaker(tstmsk, var='sftlf_ccsr', values=[1.])
         tst = os.path.join(cdat_info.get_sampledata_path(),'tas_ccsr-95a.xml')
         Tst=cdutil.VariableConditioner(tst, weightsMaker=M)
-        Tst.var='tas'
+        Tst.variable='tas'
         Tst.id='NCEP'
 
         # Ok now the final grid for this variable is a T42, masked where temperatures are not between 280K and 300K
@@ -148,7 +148,7 @@ class CDUTIL(unittest.TestCase):
         extmask = refmsk
         EMask=cdutil.WeightsMaker(source=extmask, var='sftlf_dnm')
         ED=cdutil.VariableConditioner(ext, weightsMaker=EMask)
-        ED.var='tas'
+        ED.variable='tas'
         ED.id='JONES'
 
         # Final Grid

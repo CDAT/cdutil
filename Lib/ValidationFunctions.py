@@ -23,7 +23,7 @@ def checkStringOrNone(self, name, value):
 
     :returns: If value is None or a string, value is returned. Else, an exception is raised.
     """
-    if not type(value) in [basestring, type(None)]:
+    if not isinstance(value, basestring) and value is not None:
         raise ValueError(name + ' must be a string or None')
     return value
 
@@ -95,7 +95,7 @@ def setGrid(self, name, value):
     if isinstance(value, cdms2.grid.AbstractGrid):
         return value
     elif value is None:
-        self.var = None
+        self.variable = None
         self.file = None
         self.longitude.__init__()
         self.latitude.__init__()
@@ -130,9 +130,9 @@ def getSlab(self, name):
     elif isinstance(value, basestring):
         f = cdms2.open(value)
         if times is not None:
-            v = f(self.var, time=times)
+            v = f(self.variable, time=times)
         else:
-            v = f(self.var)
+            v = f(self.variable)
         f.close()
         return v
     else:

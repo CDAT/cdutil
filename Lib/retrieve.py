@@ -689,7 +689,7 @@ class VariableConditioner(object):
 
     def _set_var(self, value):
         self._var = ValidationFunctions.checkStringOrNone(self, 'var', value)
-    var = property(_get_var, _set_var)
+    variable = property(_get_var, _set_var)
 
     def _get_id(self):
         return self._id
