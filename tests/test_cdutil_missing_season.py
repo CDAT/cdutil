@@ -8,7 +8,7 @@ class CDUTIL(unittest.TestCase):
         s=f("clt")
         cdutil.setTimeBoundsMonthly(s)
 
-        print 'Getting JJA, which should be inexistant in data'
+        print('Getting JJA, which should be inexistant in data')
 
         with self.assertRaises(Exception):
          cdutil.JJA(s[:5]) 
@@ -36,7 +36,7 @@ class CDUTIL(unittest.TestCase):
 
 
         # Now gets seasonal cycle, should have JJA all missing
-        print 'Testing seasonal cycle on 1 year data w/o JJA should work'
+        print('Testing seasonal cycle on 1 year data w/o JJA should work')
         a = cdutil.SEASONALCYCLE(s3)
         self.assertEqual(a.shape, (4, 46, 72))
         self.assertTrue(numpy.allclose(a.getTime(),[  0.,   3.,   9.,  12.]))
@@ -70,7 +70,7 @@ class CDUTIL(unittest.TestCase):
         with self.assertRaises(Exception):
           cdutil.JJA(s5)
         # Now gets seasonal cycle, should have JJA all missing
-        print 'Testing seasonal cycle on 2 years data w/o JJA should work'
+        print('Testing seasonal cycle on 2 years data w/o JJA should work')
         a = cdutil.SEASONALCYCLE(s5)
         self.assertEqual(a.shape,(7,46,72), "Error returned data with wrong shape")
 
@@ -90,7 +90,7 @@ class CDUTIL(unittest.TestCase):
         self.assertIsNotNone(a,"data w/o 1st season did not return None")
 
         # Now gets seasonal cycle, should have JJA all missing
-        print 'Testing seasonal cycle on 2 years data w/o 1st JJA should work'
+        print('Testing seasonal cycle on 2 years data w/o 1st JJA should work')
         a = cdutil.SEASONALCYCLE(s3)
         d = cdutil.SEASONALCYCLE.departures(s3)
         c = cdutil.SEASONALCYCLE.climatology(s3)
@@ -100,8 +100,8 @@ class CDUTIL(unittest.TestCase):
         self.assertTrue(numpy.equal(a.getTime().getBounds()[:],[[ -1.,   2.], [  2.,   5.], [  8.,  11.], [ 11.,  14.], [ 14.,  17.], [ 17.,  20.], [ 20.,  23.], [ 23.,  26.]]).all(), "Error bound time are not valid")
 
 
-        print " Ok we test the filling part"
-        print " this should add month '6' as all missing"
+        print(" Ok we test the filling part")
+        print(" this should add month '6' as all missing")
         b= cdutil.times.insert_monthly_seasons(a,['JJA',])
         self.assertEqual( b.shape,(9,46,72), "Error returned data with wrong shape")
         self.assertTrue(numpy.equal(b.getTime()[:],[  0.,   3.,6,   9.,  12., 15.,18.,21,24]).all(), "Error time are not valid")
@@ -115,7 +115,7 @@ class CDUTIL(unittest.TestCase):
 
 
         # Now gets seasonal cycle, should have JJA all missing
-        print 'Testing seasonal cycle on 2 years data w/o JJA should work'
+        print('Testing seasonal cycle on 2 years data w/o JJA should work')
         a = cdutil.SEASONALCYCLE(s5)
         self.assertEqual(a.shape,(7,46,72), "Error returned data with wrong shape")
 
@@ -134,7 +134,7 @@ class CDUTIL(unittest.TestCase):
         self.assertIsNotNone(a, "data with gap returned None")
 
         # Now gets seasonal cycle, should have JJA all missing
-        print 'Testing seasonal cycle on data with years of gap should work'
+        print('Testing seasonal cycle on data with years of gap should work')
         a = cdutil.SEASONALCYCLE(s3)
         d = cdutil.SEASONALCYCLE.departures(s3)
         c = cdutil.SEASONALCYCLE.climatology(s3)
@@ -143,8 +143,8 @@ class CDUTIL(unittest.TestCase):
         self.assertTrue(numpy.equal(a.getTime(), [   0.,    3.,    6.,    9.,   12.,   15.,   69.,   72.,   75.,   78.,   81.,   84.,
              87.,   90.,   93.,   96.,   99.,  102.,  105.,  108.,  111.,  114.,  117.,  120.]).all())
 
-        print " Ok we test the filling part"
-        print " this should add month '6' as all missing"
+        print(" Ok we test the filling part")
+        print(" this should add month '6' as all missing")
         b= cdutil.times.insert_monthly_seasons(a,cdutil.times.SEASONALCYCLE.seasons)
         self.assertEqual(b.shape, (41,46,72))
         self.assertTrue(numpy.equal(b.getTime()[:],[   0.,    3.,    6.,    9.,   12.,   15.,   18.,   21.,   24.,   27.,   30.,   33.,

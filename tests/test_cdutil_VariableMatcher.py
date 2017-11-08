@@ -81,7 +81,7 @@ class CDUTIL(unittest.TestCase):
         c=cdutil.VariablesMatcher(Ref, Tst, weightedGridMaker=FG, externalVariableConditioner=EV)
         # And gets it
         (ref, reffrc), (test, tfrc) = c()
-        print 'Shapes:', test.shape, ref.shape
+        print('Shapes:', test.shape, ref.shape)
         self.assertEqual(test.shape,ref.shape)
         self.assertEqual(test.shape,(12,1,18,36))
 
@@ -169,8 +169,8 @@ class CDUTIL(unittest.TestCase):
         #print c
         # And gets it
         (ref, reffrc), (test, tfrc) = c()
-        print 'Shapes:', test.shape, ref.shape
-        print 'Shapes:', tfrc.shape, reffrc.shape
+        print('Shapes:', test.shape, ref.shape)
+        print('Shapes:', tfrc.shape, reffrc.shape)
         self.assertEqual(ref.shape,reffrc.shape)
         self.assertEqual(test.shape,tfrc.shape)
         self.assertEqual(test.shape,ref.shape)

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # Adapted for numpy/ma/cdms2 by convertcdms.py
 
+from __future__ import print_function
 import cdtime,cdms2,os,cdat_info
 import cdutil
 import MV2
@@ -22,7 +23,7 @@ class CDUTIL(unittest.TestCase):
         fsc = cdms2.open(os.path.join(cdat_info.get_sampledata_path(),'tas_mo_clim.nc'))
         s=self.f('tas',longitude=(0,360,'co'))
         acok=fsc('climseas',longitude=(0,360,'co'))
-        print(s.getTime().units)
+        print((s.getTime().units))
         ac=cdutil.times.JAN(s)
 
     def teestTimes(self):
@@ -81,8 +82,8 @@ class CDUTIL(unittest.TestCase):
         ax=a.getAxis(0)
         ax.setBounds(bounds)
         #print cdutil.times.centroid(a,[-10,30]) 
-        print('Centroid Normal:',cdutil.times.centroid(a,[0,365])) 
-        print('Centroid Cyclic:',cdutil.times.cyclicalcentroid(a,[0,365])) 
+        print(('Centroid Normal:',cdutil.times.centroid(a,[0,365]))) 
+        print(('Centroid Cyclic:',cdutil.times.cyclicalcentroid(a,[0,365]))) 
 
 
         djf=cdutil.DJF(self.tas_mo)
@@ -94,7 +95,7 @@ class CDUTIL(unittest.TestCase):
         
         tc=self.tas_mo.getTime().asComponentTime()
 
-        print(tc[0],tc[-1])
+        print((tc[0],tc[-1]))
 
         ref=cdutil.ANNUALCYCLE.climatology(self.tas_mo(time=('1980','1985','co')))
         dep=cdutil.ANNUALCYCLE.departures(self.tas_mo)

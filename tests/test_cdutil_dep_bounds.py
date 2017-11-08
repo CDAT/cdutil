@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 import cdtime
 import cdms2
 import MV2
@@ -26,8 +26,8 @@ class CDUTIL(unittest.TestCase):
         dep = cdutil.times.ANNUALCYCLE.departures(data)
         tc = dep.getTime().asComponentTime()
         print(t1,t2,tc[0],tc[-1])
-        self.assertEqual( tc[0], t1)
-        self.assertEqual( tc[-1], t2)
+        self.assertEqual( tc[0].cmp(t1), 0)
+        self.assertEqual( tc[-1].cmp(t2), 0)
         self.assertEqual( data.getTime().units, units)
         self.assertEqual( dep.getTime().units, units)
 

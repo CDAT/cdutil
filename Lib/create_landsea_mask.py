@@ -207,9 +207,9 @@ def generateLandSeaMask(target, source=None, threshold_1=.2,
                 'navy_land.nc'))('sftlf')
 
     try:
-        print("REGRIDDING WITH TARGET:",target)
-        print("REGRIDDING WITH SOURCE:",source)
-        print("REGRIDDING WITH SOURCE GRID:",source.getGrid())
+        print("REGRIDDING WITH TARGET:", target)
+        print("REGRIDDING WITH SOURCE:", source)
+        print("REGRIDDING WITH SOURCE GRID:", source.getGrid())
         navy_frac_t = source.regrid(target, regridTool='regrid2')
     except Exception as err:
         raise Exception("error, cannot regrid source data to target, got error message: %s" % err)

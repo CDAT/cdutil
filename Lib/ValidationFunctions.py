@@ -1,10 +1,14 @@
 # Adapted for numpy/ma/cdms2 by convertcdms.py
-import string
 import numpy
 import numpy.ma
 import cdms2
 import os
 import cdutil
+
+try:
+    basestring
+except NameError:
+    basestring = str
 
 
 def checkStringOrNone(self, name, value):
@@ -19,7 +23,7 @@ def checkStringOrNone(self, name, value):
 
     :returns: If value is None or a string, value is returned. Else, an exception is raised.
     """
-    if not type(value) in [bytes, type(None)]:
+    if not type(value) in [basestring, type(None)]:
         raise ValueError(name + ' must be a string or None')
     return value
 
@@ -57,7 +61,7 @@ def setSlab(self, name, value):
     if isinstance(value, numpy.ndarray) or numpy.ma.isMA(value):
         self.data = value
         return ('data', value)
-    elif isinstance(value, bytes):
+    elif isinstance(value, basestring):
         if os.path.exists(value):
             return('file', value)
         else:
@@ -123,7 +127,7 @@ def getSlab(self, name):
 
     if isinstance(value, numpy.ndarray) or numpy.ma.isMA(value):
         return value
-    elif isinstance(value, bytes):
+    elif isinstance(value, basestring):
         f = cdms2.open(value)
         if times is not None:
             v = f(self.var, time=times)
@@ -162,15 +166,15 @@ def checkInStringsList(self, name, value, values):
     :param values: list of strings to search through for value
     :type values: list
     """
-    if not isinstance(value, bytes):
+    if not isinstance(value, basestring):
         raise ValueError(name + 'must be a string')
-    elif not string.lower(value) in values:
+    elif not value.lower() in values:
         err = name + " must be in ('" + values[0]
         for v in values[1:-1]:
             err = err + ", '" + v + "'"
         err = err + " or '" + values[-1] + "')"
         raise ValueError(err)
-    self._basic_set(name, string.lower(value))
+    self._basic_set(name, value.lower())
 
 
 def checkInStringsListInt(self, name, value, values):
@@ -193,8 +197,8 @@ def checkInStringsListInt(self, name, value, values):
                 str1 = str1 + "'" + v + "', "
             i = i + 1
     err = str1[:-2] + ')' + str2[:-2] + ')'
-    if isinstance(value, bytes):
-        value = string.lower(value)
+    if isinstance(value, basestring):
+        value = value.lower()
         if value not in val:
             raise ValueError(err)
         i = 0

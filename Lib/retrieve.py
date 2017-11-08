@@ -354,7 +354,7 @@ class WeightedGridMaker(object):
 
     def _set_var(self, value):
         self._var = ValidationFunctions.checkStringOrNone(self, 'var', value)
-    var = property(_get_var, _set_var)
+    variable = property(_get_var, _set_var)
 
     def _get_file(self):
         return self._file

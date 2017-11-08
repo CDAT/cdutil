@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 import cdms2,cdutil,os,sys,numpy,cdat_info
 import unittest
 
