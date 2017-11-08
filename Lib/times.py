@@ -474,9 +474,7 @@ class TimeSlicer:
         # retrieve the time axis
         tim = slab.getTime()
         # Let slicer figure out wich slices we want
-        print("CALLING SLICER")
         slices, bounds, norm = self.slicer(tim, slicerarg)
-        print("PASSED SLICER")
 # print 'Slices:',slices,len(slices)
 # print 'Bounds:',bounds
 # print 'Norm:',norm
@@ -748,29 +746,21 @@ def monthBasedSlicer(tim, arg=None):
     bnds = tim.getBounds()
     cal = tim.getCalendar()
     units = tim.units
-    print("UNITS FOUND:", units)
-    print("BOUNDS:", bnds)
     nt = len(tim)
     for i in range(nt):
-        print("I:", i)
-        print("BNDS", bnds[i])
         b0 = cdtime.reltime(bnds[i][0], units)
-        print("BNDS, uni", bnds[i], units)
         b1 = cdtime.reltime(bnds[i][1], units)
         iout = 0
         # Now figures out what the length of
         # the requested season
-        print("BS:", b0, b1)
         b = b0.tocomp(cal)
         yr = b.year
-        print("MONTHS:", months, b)
         if months[-1] == 12:
             bb = cdtime.comptime(b.year + 1)
         else:
             bb = cdtime.comptime(b.year, months[-1] + 1)
 # if b.cmp(bb)>0:
 # yr=yr+1
-        print("BB:", bb, units)
         # do we span 2 years ?
         if months[0] > months[-1]:  # yes
             # Are we in the part before the year's end
@@ -782,36 +772,25 @@ def monthBasedSlicer(tim, arg=None):
                 t0 = cdtime.comptime(yr, months[0])
                 t1 = cdtime.comptime(yr + 1, months[-1] + 1)
         else:
-            print("IN ELSE")
             t0 = cdtime.comptime(yr, months[0])
-            print("T0", t0)
             if months[-1] != 12:
                 t1 = cdtime.comptime(yr, months[-1] + 1)
             else:
                 t1 = cdtime.comptime(yr + 1)
-        print("t1:", t1)
         if t0.cmp(b1.tocomp(cal)) > 0:
             t1 = t1.add(-1, cdtime.Year)
             t0 = t0.add(-1, cdtime.Year)
-        print("t1b:", t1)
         if t1.cmp(b0.tocomp(cal)) < 0:
             t1 = t1.add(1, cdtime.Year)
             t0 = t0.add(1, cdtime.Year)
-        print("t1c:", t1, units)
         t1 = t1.torel(units, cal)
-        print("t1d:", t1, units)
 # if i<5:print 't1 after:',t1.tocomp(cal)
         t0 = t0.torel(units, cal)
-        print("t0d:", t0, units)
         lenseas = float(t1.value - t0.value)
-        print("COMPARISON", t0, b0)
-        print("RES:", t0.cmp(b0))
-        print("COMPARISON2")
         # Now checks if we overlap the season
 # if i<5: print '---',i,b0.tocomp(cal),b1.tocomp(cal),t0.tocomp(cal),t1.tocomp(cal)
 # if i<5: print '---',i,t0.cmp(b0),b1.cmp(t1),t1.cmp(b0)
         if t0.cmp(b0) > -1:        # cell starts after season started
-            print("IN IF")
             if b1.cmp(t1) >= 0:    # and ends before the season ends
                 sub.append(i)
                 subb.append([t0.value, t1.value])
@@ -828,7 +807,6 @@ def monthBasedSlicer(tim, arg=None):
 
         elif t1.cmp(b0) == 1:      # end season after beginning of cell ?
             # print 'index,t1>b0 time',i,tim[i],t1.tocomp(),b0.tocomp(),b
-            print("IN ELSE")
             if b1.cmp(t1) > 0:             # and ends after the end
                 sub.append(i)
                 subb.append([b0.value, t1.value])
@@ -1386,7 +1364,6 @@ class ASeason(TimeSlicer):
 
 class Seasons(ASeason):
     def __init__(self, *seasons):
-        print("SEASON INITIATED WITH:", seasons)
         if len(seasons) == 1:
             seasons = seasons[0]
         if isinstance(seasons, basestring):
