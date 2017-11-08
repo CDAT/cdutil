@@ -115,7 +115,6 @@ def run_command(command, join_stderr=True):
     out = []
     while P.poll() is None:
         read = P.stdout.readline().rstrip()
-        print("We read: {}".format(read),file=sys.stderr)
         out.append(read.decode())
         if args.verbosity > 1 and len(read) != 0:
             print(read)
