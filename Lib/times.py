@@ -755,12 +755,6 @@ def monthBasedSlicer(tim, arg=None):
         # the requested season
         b = b0.tocomp(cal)
         yr = b.year
-        if months[-1] == 12:
-            bb = cdtime.comptime(b.year + 1)
-        else:
-            bb = cdtime.comptime(b.year, months[-1] + 1)
-# if b.cmp(bb)>0:
-# yr=yr+1
         # do we span 2 years ?
         if months[0] > months[-1]:  # yes
             # Are we in the part before the year's end
@@ -1124,8 +1118,8 @@ def setAxisTimeBoundsDaily(axis, frequency=1):
         y = t.year
         h = t.hour
         for f in range(frequency):
-            if f * (24 / frequency) <= h < (f + 1) * (24 / frequency):
-                t1 = cdtime.comptime(y, m, d, f * (24 / frequency))
+            if f * (24 // frequency) <= h < (f + 1) * (24 // frequency):
+                t1 = cdtime.comptime(y, m, d, f * (24 // frequency))
                 t2 = t1.add(24 / frequency, cdtime.Hours, tim.getCalendar())
                 t1 = t1.torel(units, tim.getCalendar())
                 t2 = t2.torel(units, tim.getCalendar())

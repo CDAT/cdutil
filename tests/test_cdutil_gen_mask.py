@@ -6,9 +6,18 @@ class CDUTIL(unittest.TestCase):
     def testGenmask(self):
 
         f=cdms2.open(os.path.join(sys.prefix,"share","cdutil","navy_land.nc"))
-        navy_frac = f("sftlf")/100.
-
+        navy_frac_one = f('sftlf')
+        g = navy_frac_one.getGrid()
+        print("SOURCE GRID:",g)
+        print("LON:",g.getLongitude())
+        print("LAT:",g.getLatitude())
+        navy_frac = navy_frac_one / 100.
+        g = navy_frac.getGrid()
+        print("SOURCE GRID 2:",g)
+        print("LON:",g.getLongitude())
+        print("LAT:",g.getLatitude())
         target = cdms2.open(os.path.join(cdat_info.get_sampledata_path(),'clt.nc'))("clt",slice(0,1)).getGrid()
+        print("TARGET:",navy_frac.getGrid())
         mask = cdutil.generateLandSeaMask(target,navy_frac)
         target = cdms2.open(os.path.join(cdat_info.get_sampledata_path(),'clt.nc'))("clt",slice(0,1))
         mask = cdutil.generateLandSeaMask(target,navy_frac)
