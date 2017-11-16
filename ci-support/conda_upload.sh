@@ -20,7 +20,6 @@ source activate root
 conda install -q anaconda-client conda-build
 conda config --set anaconda_upload no
 export CONDA_BLD_PATH=${HOME}/conda-bld
-export VERSION=$(date +%Y.%m.%d)
 echo "Cloning recipes"
 git clone git://github.com/UV-CDAT/conda-recipes
 cd conda-recipes
