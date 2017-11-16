@@ -9,7 +9,7 @@ from . import ValidationFunctions
 import genutil
 
 try:
-    basestring
+    basestring  # noqa
 except Exception:
     basestring = str
 

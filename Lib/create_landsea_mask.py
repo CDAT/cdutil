@@ -190,7 +190,6 @@ def generateLandSeaMask(target, source=None, threshold_1=.2,
     """
     cdat_info.pingPCMDIdb("cdat", "cdutil.generateLandSeaMask")
     if cdms2.isVariable(target):
-        print("IT THINKS IT IS A MV")
         target = target.getGrid()
         if target is None:
             raise Exception("Error target data passed do not have  a grid")
@@ -198,7 +197,6 @@ def generateLandSeaMask(target, source=None, threshold_1=.2,
         raise Exception("Error: target grid must be rectilinear")
 
     if source is None:
-        print("SOURCE WAS NONE READING DATA")
         source = cdms2.open(
             os.path.join(
                 cdat_info.get_prefix(),
@@ -207,9 +205,7 @@ def generateLandSeaMask(target, source=None, threshold_1=.2,
                 'navy_land.nc'))('sftlf')
 
     try:
-        print("REGRIDDING WITH TARGET:", target)
-        print("REGRIDDING WITH SOURCE:", source)
-        print("REGRIDDING WITH SOURCE GRID:", source.getGrid())
+        # print("REGRIDDING WITH SOURCE:", source)
         navy_frac_t = source.regrid(target, regridTool='regrid2')
     except Exception as err:
         raise Exception("error, cannot regrid source data to target, got error message: %s" % err)

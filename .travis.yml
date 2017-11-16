@@ -25,4 +25,4 @@ script:
 - python setup.py install 
 - python run_tests.py -v2
 after_success:
-    - if [ "$TRAVIS_OS_NAME" == "linux" -a "$TRAVIS_BRANCH" == "py3" -a "$TRAVIS_PULL_REQUEST" == "false" ]; then source activate root && conda install conda-build && conda install anaconda-client && bash ci-support/conda_upload.sh ; fi
+    - if [ "$TRAVIS_OS_NAME" == "linux" -a "$TRAVIS_BRANCH" == "master" -a "$TRAVIS_PULL_REQUEST" == "false" ]; then source activate root && conda install conda-build && conda install anaconda-client && bash ci-support/conda_upload.sh ; fi

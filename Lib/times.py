@@ -295,7 +295,8 @@ def mergeTime(ds, statusbar=1, fill_value=1.e20):
         try:  # In order to speeed up, raise an execption to exit the inner loops
             for i in range(nslab):
                 tim = times[i]
-                for it in numpy.sort(list(timesleft[i].keys())):
+                for it_tmp in numpy.sort(list(timesleft[i].keys())):
+                    it = int(it_tmp)
                     t = tim[it]
                     val = timesleft[i][it]
                     if val.value == vals[v]:
@@ -319,7 +320,7 @@ def mergeTime(ds, statusbar=1, fill_value=1.e20):
                         raise Exception  # to exit the it and i loops
                     elif val.value > vals[v]:
                         break
-        except BaseException:
+        except BaseException as err:
             pass
     if statusbar is not None and nt != 1:
         if not isinstance(prev[0], type(0)):
