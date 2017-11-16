@@ -106,6 +106,7 @@ def setGrid(self, name, value):
 
 
 def setSlabOnly(self, name, value):
+    print("WE GOT:",type(value))
     if isinstance(value, numpy.ndarray) or numpy.ma.isMA(value):
         return value
     elif isinstance(value, type(None)):

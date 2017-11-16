@@ -8,6 +8,11 @@ import cdtime
 from . import ValidationFunctions
 import genutil
 
+try:
+    basestring
+except Exception:
+    basestring = str
+
 
 class WeightsMakerError(Exception):
     def __init__(self, args):
@@ -73,7 +78,7 @@ class WeightsMaker(object):
             allowing a mask to be generated based on the data itself.  (If, for example, the WeightsMaker is passed
             values=["input", 273.15] and actions=[MV.less], temperatures below freezing would be masked.)
         """
-        if isinstance(source, bytes):
+        if isinstance(source, basestring):
             self.file = source
             self.mask = None
         else:
@@ -86,7 +91,7 @@ class WeightsMaker(object):
 
     def get(self, input=None):
         v = self.mask
-        if isinstance(self.file, bytes):
+        if isinstance(self.file, basestring):
             f = cdms2.open(self.file)
             v = f(self.variable, squeeze=1)
             f.close()
@@ -457,7 +462,7 @@ class VariableConditioner(object):
             self.weightedGridMaker = WeightedGridMaker()
             self.weightedGridMaker.grid = weightedGridMaker
 
-        if isinstance(source, bytes):
+        if isinstance(source, basestring):
             self.file = source
             self.data = None
         else:
