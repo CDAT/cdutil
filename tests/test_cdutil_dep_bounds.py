@@ -16,7 +16,6 @@ class CDUTIL(unittest.TestCase):
         data= MV2.array(numpy.random.random((length)))
         data.setAxis(0,t)
         cdutil.setTimeBoundsMonthly(t)
-        print("TCCCCCP:",data.getTime().asComponentTime())
         return data,t,t.asComponentTime()
 
     def check(self,offset=0,midunits="months since 1801",units="months since 1800"):
@@ -25,7 +24,6 @@ class CDUTIL(unittest.TestCase):
         t1,t2 = tc[0],tc[-1]
         dep = cdutil.times.ANNUALCYCLE.departures(data)
         tc = dep.getTime().asComponentTime()
-        print(t1,t2,tc[0],tc[-1])
         self.assertEqual( tc[0].cmp(t1), 0)
         self.assertEqual( tc[-1].cmp(t2), 0)
         self.assertEqual( data.getTime().units, units)
