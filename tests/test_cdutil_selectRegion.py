@@ -37,12 +37,12 @@ class CDUTIL(unittest.TestCase):
         f = open(tmpfile[1], 'r')
         lines = f.readlines()
         for line in lines:
-            if line.find('warnings') != -1:
+            if line.find('Only axis') != -1:
                 break
         f.close()
         os.unlink(tmpfile[1])
 
-        self.assertIn('warnings', line.strip())
+        self.assertIn('Only axis', line.strip())
         bounds = d.getLatitude().getBounds()
         self.assertTrue(numpy.allclose(bounds[0], numpy.array([-50., -49.19124603])))
         self.assertTrue(numpy.allclose(bounds[-1], numpy.array([49.19124603,  50.])))
