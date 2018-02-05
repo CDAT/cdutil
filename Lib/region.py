@@ -1,22 +1,27 @@
 # Adapted for numpy/ma/cdms2 by convertcdms.py
 from cdms2.selectors import SelectorComponent
 import cdat_info
-import warnings
 
 
 class DomainComponent(SelectorComponent):
-    '''gets a domain, and by default adjusts the bounds to the domain
-    or if exact is set to 0 or None gets all the domain that has
+    """
+    Gets a domain, and by default adjusts the bounds to the domain,
+    OR if exact is set to 0 or None gets all the domain that has
     parts of the domain requested, also post processing allows you to apply a mask
     dimension names can be passed as keywords,
     but if no name is passed arguments are taken in order and applied to the corresponding axis
-    Overwritting an axis (2 keywords or keyword + argument) is not allowed
-    Example of use:
-    NH=cdms.selectors.Selector(domain(latitude=(0.,90.)))
-    '''
+    Overwriting an axis (2 keywords or keyword + argument) is not allowed
+
+    :Example:
+
+        .. doctest:: DomainComponent
+
+            >>> import cdms2
+            >>> NH=cdms2.selectors.Selector(domain(latitude=(0.,90.)))
+    """
 
     def __init__(self, *args, **kargs):
-        ''' initialise some value such as tolerances for equality'''
+        """ initialise some value such as tolerances for equality"""
         self.args = args
         self.kargs = kargs
         self.atol = kargs.get('atol', 1.E-8)
@@ -24,7 +29,7 @@ class DomainComponent(SelectorComponent):
         self.exact = kargs.get('exact', 1)
         if not (self.exact is None or isinstance(self.exact, type(0))):
             raise 'Error keyword: ''exact'' value: ' + \
-                str(exact) + ' not legal'
+                str(self.exact) + ' not legal'
 
     def __str__(self):
         s = 'Exact Region Selector\n'
@@ -35,13 +40,12 @@ class DomainComponent(SelectorComponent):
             s += ')\n'
         if self.kargs != {}:
             s += 'Keywords:\n'
-            for k in self.kargs.keys():
+            for k in list(self.kargs.keys()):
                 s += '\t' + str(k) + ':' + str(self.kargs[k]) + '\n'
         return s
 
     def specify(self, slab, axes, specification, confined_by, aux):
-        ''' First part: confine the slab within a Domain wide enough to do the exact in post'''
-        import string
+        """ First part: confine the slab within a Domain wide enough to do the exact in post"""
         import copy
         from numpy.ma import minimum, maximum
         # myconfined is for later, we can't confine a dimension twice with an
@@ -57,9 +61,6 @@ class DomainComponent(SelectorComponent):
                 confined_by[i] = self
                 # How do we want to confine this dim ?
                 self.aux[i] = specs = list(self.args[i])
-                if len(specs) > 2:
-                    warningsw.warn(
-                        "Only axis bounds (min, max) can be specified for axis, other arguments are ignored.")
                 if isinstance(specs, type(slice(0))):
                     specification[i] = specs  # If it's a slicing nothing to do
                 else:  # But if it's not...
@@ -99,7 +100,7 @@ class DomainComponent(SelectorComponent):
                     sp = [specs[0], specs[1], 'oob']
             else:
                 return 1
-        for kw in self.kargs.keys():
+        for kw in list(self.kargs.keys()):
             axis = None
             for i in range(len(axes)):
                 if axes[i].id == kw:
@@ -122,19 +123,16 @@ class DomainComponent(SelectorComponent):
                         if axes[i].isLatitude():
                             axis = i
                 # keyword not a recognised keyword or dimension name
-                elif not kw in ['exact', 'atol', 'rtol']:
+                elif kw not in ['exact', 'atol', 'rtol']:
                     raise 'Error, keyword: ' + kw + ' not recognized'
             # At this point, if axis is None:
             # we are dealing with a keyword for the selector
             # so we'll skip it
-            if not axis is None:
+            if axis is not None:
                 if confined_by[axis] is None:
                     confined_by[axis] = self
                     myconfined[axis] = 1
                     self.aux[axis] = specs = list(self.kargs[kw])
-                    if len(specs) > 2:
-                        warnings.warn(
-                            "Only axis bounds (min, max) can be specified for axis, other arguments are ignored.")
                     if not isinstance(specs, type(slice(0))):
                         if specs[0] is None:
                             tmp = axes[axis].getBounds()
@@ -178,12 +176,12 @@ class DomainComponent(SelectorComponent):
         return 0
 
     def same(self, data, value):
-        ''' Check if data is basically the same than value'''
+        """ Check if data is basically the same than value"""
         return abs(data - value) < self.atol + self.rtol * abs(value)
 
     def post(self, fetched, slab, axes, specifications,
              confined_by, aux, axismap):
-        ''' Post processing retouches the bounds and later will deal with the mask'''
+        """ Post processing retouches the bounds and later will deal with the mask"""
         import cdms2 as cdms
         fetched = cdms.createVariable(fetched, copy=1)
         faxes = fetched.getAxisList()
@@ -201,9 +199,9 @@ class DomainComponent(SelectorComponent):
                             'Region error, axis:' + ax.id + ' has no bounds')
                     ax0 = ax[0]
                     ax1 = ax[-1]
-                    '''sets xb with the bounds
+                    """sets xb with the bounds
                     smaller value of axis first
-                    switches ax0 and ax1 if necessary'''
+                    switches ax0 and ax1 if necessary"""
                     if ax[0] < ax[-1]:
                         xb = [bounds[0], bounds[-1]]  # Extreme bounds
                     else:
@@ -220,9 +218,9 @@ class DomainComponent(SelectorComponent):
                         lbound = tmp
                     b0 = xb[0]  # bounds of lower   value of the axis
                     b1 = xb[1]  # bounds of greater value of the axis
-                    ''' The folowing reset the values of the axis
+                    """ The folowing reset the values of the axis
                     sets it to the middle of the new cell
-                    also reset the bounds accordingly'''
+                    also reset the bounds accordingly"""
                     if not(b0[0] > fbound and b0[0] < lbound):
                         if not self.same(
                                 b0[0], fbound):  # make sure they are actually different not just very close
@@ -264,7 +262,7 @@ class DomainComponent(SelectorComponent):
 
 
 def domain(*args, **kargs):
-    '''construct the selector'''
+    """construct the selector"""
     import cdms2 as cdms
     cdat_info.pingPCMDIdb("cdat", "cdutil.region.domain")
     a = cdms.selectors.Selector(DomainComponent(*args, **kargs))
