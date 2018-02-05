@@ -2,8 +2,8 @@
 ls
 pwd
 export PATH=${HOME}/miniconda/bin:${PATH}
-conda create -n py3 -c uvcdat/label/nightly -c conda-forge genutil nose flake8 "python>3" "numpy=1.13" netcdf-fortran=4.4.4=6
-conda create -n py2 -c uvcdat/label/nightly -c conda-forge genutil nose flake8 "numpy=1.13" netcdf-fortran=4.4.4=6
+conda create -n py3 -c uvcdat/label/nightly -c conda-forge genutil nose flake8 "python>3" "numpy=1.13" 
+conda create -n py2 -c uvcdat/label/nightly -c conda-forge genutil nose flake8 "numpy=1.13" 
 export UVCDAT_ANONYMOUS_LOG=False
 source activate py3
 python setup.py install
