@@ -21,6 +21,7 @@ script:
 - python setup.py install 
 - python run_tests.py -v2
 - rm -rf build
+# netcdf-fortran 4.4.4=6 (3 is no longer avail)
 - conda create -n py3 -c uvcdat/label/nightly -c conda-forge -c nesii/channel/dev-esmf genutil nose flake8 "python>3" "numpy=1.13" netcdf-fortran=4.4.4=6
 - source activate py3
 - python setup.py install 
