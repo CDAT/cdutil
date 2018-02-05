@@ -1024,9 +1024,9 @@ def dayBasedSlicer(tim, arg=None):
 
 def weekday(a, calendar=None):
     if calendar is None:
-        b = a.torel('days since 0')
+        b = a.torel('days since 1')
     else:
-        b = a.torel('days since 0', calendar)
+        b = a.torel('days since 1', calendar)
     d = (b.value - 3) % 7
     if d == 1:
         return 'monday'
@@ -1565,11 +1565,11 @@ class Seasons(ASeason):
                 months[0] = months[0] - 12
             v1 = cdtime.reltime(
                 months[0] - 1,
-                'months since 0').torel(
-                'days since 0',
+                'months since 1').torel(
+                'days since 1',
                 timecalendar)
             v2 = cdtime.reltime(months[-1],
-                                'months since 0').torel('days since 0',
+                                'months since 1').torel('days since 1',
                                                         timecalendar)
             vals[i] = float(v1.value + v2.value) / 2.
             bnds[i] = [v1.value, v2.value]
@@ -1608,7 +1608,7 @@ class Seasons(ASeason):
                 statusbar.pop(0)
         t = cdms2.createAxis(vals, bounds=bnds)
         t.id = 'time'
-        t.units = 'days since 0'
+        t.units = 'days since 1'
         t.designateTime()
         t.setCalendar(tim.getCalendar())
         ax = slab.getAxisList()
