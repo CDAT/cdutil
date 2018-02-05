@@ -4,15 +4,14 @@ USER=uvcdat
 VERSION="2.12"
 export PATH="$HOME/miniconda/bin:$PATH"
 echo "Trying to upload conda"
+ESMF_CHANNEL="nesii/label/dev-esmf"
 if [ $(uname) == "Linux" ]; then
     OS=linux-64
     echo "Linux OS"
     conda update -y -q conda
-    ESMF_CHANNEL="nesii/label/dev-esmf"
 else
     echo "Mac OS"
     OS=osx-64
-    ESMF_CHANNEL="nadeau1"
 fi
 
 mkdir ~/conda-bld
