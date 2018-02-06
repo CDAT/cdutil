@@ -18,7 +18,7 @@ before_install:
 - conda update -y -q conda
   #- conda install gcc
 script:
-=======
+# =======
 - conda create -n py2 -c uvcdat/label/nightly -c conda-forge genutil nose flake8 "numpy=1.13" 
 - export UVCDAT_ANONYMOUS_LOG=False
 - echo $TRAVIS_BRANCH
