@@ -1,6 +1,7 @@
 # Adapted for numpy/ma/cdms2 by convertcdms.py
 from cdms2.selectors import SelectorComponent
 import cdat_info
+import warnings
 
 
 class DomainComponent(SelectorComponent):
@@ -61,6 +62,9 @@ class DomainComponent(SelectorComponent):
                 confined_by[i] = self
                 # How do we want to confine this dim ?
                 self.aux[i] = specs = list(self.args[i])
+                if len(specs) > 2:
+                    warnings.warn(
+                        "Only axis bounds (min, max) can be specified for axis, other arguments are ignored.")
                 if isinstance(specs, type(slice(0))):
                     specification[i] = specs  # If it's a slicing nothing to do
                 else:  # But if it's not...
@@ -133,6 +137,9 @@ class DomainComponent(SelectorComponent):
                     confined_by[axis] = self
                     myconfined[axis] = 1
                     self.aux[axis] = specs = list(self.kargs[kw])
+                    if len(specs) > 2:
+                        warnings.warn(
+                            "Only axis bounds (min, max) can be specified for axis, other arguments are ignored.")
                     if not isinstance(specs, type(slice(0))):
                         if specs[0] is None:
                             tmp = axes[axis].getBounds()

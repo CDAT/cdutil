@@ -1,6 +1,13 @@
 os:
-    - linux
+  - linux
+
+language: python
+
+python:
+  - "2.7"
+
 sudo: false
+
 before_install:
 - if [ "$TRAVIS_OS_NAME" = "linux" ]; then wget https://repo.continuum.io/miniconda/Miniconda2-4.3.21-Linux-x86_64.sh -O miniconda.sh; fi
 - if [ "$TRAVIS_OS_NAME" = "osx" ]; then wget https://repo.continuum.io/miniconda/Miniconda2-latest-MacOSX-x86_64.sh -O miniconda.sh; fi
@@ -10,7 +17,8 @@ before_install:
 - conda update -y -q conda
   #- conda install gcc
 script:
-- conda create -n py2 -c uvcdat/label/nightly -c conda-forge genutil nose flake8 "numpy=1.13" netcdf-fortran=4.4.4=3
+# =======
+- conda create -n py2 -c uvcdat/label/nightly -c conda-forge genutil nose flake8 "numpy=1.13" 
 - export UVCDAT_ANONYMOUS_LOG=False
 - echo $TRAVIS_BRANCH
 - export TRAVIS_PR_BRANCH=$TRAVIS_BRANCH
@@ -20,7 +28,8 @@ script:
 - python setup.py install 
 - python run_tests.py -v2
 - rm -rf build
-- conda create -n py3 -c uvcdat/label/nightly -c conda-forge -c nesii/channel/dev-esmf genutil nose flake8 "python>3" "numpy=1.13" netcdf-fortran=4.4.4=3
+# netcdf-fortran 4.4.4=6 (3 is no longer avail)
+- conda create -n py3 -c uvcdat/label/nightly -c conda-forge -c nesii/channel/dev-esmf genutil nose flake8 "python>3" "numpy=1.13" 
 - source activate py3
 - python setup.py install 
 - python run_tests.py -v2
