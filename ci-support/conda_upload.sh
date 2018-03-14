@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 PKG_NAME=cdutil
-USER=uvcdat
+USER=cdat
 VERSION="2.12"
 export PATH="$HOME/miniconda/bin:$PATH"
 echo "Trying to upload conda"
@@ -26,6 +26,6 @@ cd conda-recipes
 rm -rf uvcdat
 python ./prep_for_build.py
 echo "Building and uploading now"
-conda build  -c uvcdat/label/nightly -c conda-forge -c ${ESMF_CHANNEL} -c uvcdat ${PKG_NAME} --python=2.7
-conda build  -c uvcdat/label/nightly -c conda-forge -c ${ESMF_CHANNEL} -c uvcdat ${PKG_NAME} --python=3.6
+conda build  -c cdat/label/nightly -c uvcdat/label/nightly -c conda-forge -c ${ESMF_CHANNEL} -c uvcdat ${PKG_NAME} --python=2.7
+conda build  -c cdat/label/nightly -c uvcdat/label/nightly -c conda-forge -c ${ESMF_CHANNEL} -c uvcdat ${PKG_NAME} --python=3.6
 anaconda -t $CONDA_UPLOAD_TOKEN upload -u $USER -l nightly $CONDA_BLD_PATH/$OS/$PKG_NAME-${VERSION}.$(date +%Y.%m.%d)*_0.tar.bz2 --force
