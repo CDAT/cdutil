@@ -78,6 +78,7 @@ class CDUTIL(unittest.TestCase):
         FG.latitude.first=-85.
         FG.latitude.delta=10.
         # Now creates the compare object
+        print("REF:",Ref())
         c=cdutil.VariablesMatcher(Ref, Tst, weightedGridMaker=FG, externalVariableConditioner=EV)
         # And gets it
         (ref, reffrc), (test, tfrc) = c()
