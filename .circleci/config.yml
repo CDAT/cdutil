@@ -54,26 +54,6 @@ aliases:
        if [ $PY2_RESULT	-ne 0 -o $PY3_RESULT -ne 0]; then
          exit 1
        fi
-
-  - &run_cdutil_tests
-    name: run_cdutil_tests
-    command: |
-       export PATH=$WORKDIR/miniconda/bin:$PATH
-       export UVCDAT_ANONYMOUS_LOG=False
-       set -e
-       source activate py2
-       python run_tests.py -v2 
-       PY2_RESULT=$?
-       echo "*** py2 test result: "${PY2_RESULT}
-       source activate py3
-       python run_tests.py -v2 
-       PY3_RESULT=$?
-       echo "*** py3 test result: "${PY3_RESULT}
-       if [ $PY2_RESULT -eq 0 -a $PY3_RESULT -eq 0 -a $CIRCLE_BRANCH == "master" ]; then bash ./ci-support/conda_upload.sh ; fi
-       if [ $PY2_RESULT	-ne 0 -o $PY3_RESULT -ne 0 ]; then
-         exit 1
-       fi
-
 jobs:
   macos_cdutil:
     macos:
