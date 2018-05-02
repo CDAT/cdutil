@@ -70,8 +70,6 @@ aliases:
        PY3_RESULT=$?
        echo "*** py3 test result: "${PY3_RESULT}
        if [ $PY2_RESULT -eq 0 -a $PY3_RESULT -eq 0 -a $CIRCLE_BRANCH == "master" ]; then bash ./ci-support/conda_upload.sh ; fi
-       # just for testing
-       $PY3_RESULT = 1
        if [ $PY2_RESULT	-ne 0 -o $PY3_RESULT -ne 0]; then
          exit 1
        fi
