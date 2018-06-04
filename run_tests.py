@@ -6,11 +6,12 @@ import multiprocessing
 #                                                                                                                                    
 # TEMPORARY -- REVISIT                                                                                                               
 #                                                                                                                                    
-sys.path.append("/Users/muryanto1/repos/cdat_info/Lib")
-from Util import *
-from Const import *
+#sys.path.append("/Users/muryanto1/repos/cdat_info/Lib")
 
-import TestRunnerBase
+from cdat_info.Util import *
+from cdat_info.Const import *
+
+import cdat_info.TestRunnerBase
 
 test_suite_name = 'cdutil'
 
