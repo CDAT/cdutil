@@ -8,10 +8,10 @@ import multiprocessing
 #                                                                                                                                    
 #sys.path.append("/Users/muryanto1/repos/cdat_info/Lib")
 
-from cdat_info.Util import *
-from cdat_info.Const import *
+from cdat_info.Lib.Util import *
+from cdat_info.Lib.Const import *
 
-import cdat_info.TestRunnerBase
+import cdat_info.Lib.TestRunnerBase
 
 test_suite_name = 'cdutil'
 
