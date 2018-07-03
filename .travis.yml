@@ -28,7 +28,7 @@ script:
 - python setup.py install 
 - python run_tests.py -v2
 - rm -rf build
-- conda create -n py3 -c cdat/label/nightly -c conda-forge -c cdat genutil testsruner "numpy>1.14" "python>3"
+- conda create -n py3 -c cdat/label/nightly -c conda-forge -c cdat genutil testsrunner "numpy>1.14" "python>3"
 - source activate py3
 - python setup.py install 
 - python run_tests.py -v2
