@@ -54,7 +54,7 @@ aliases:
   - &conda_upload
     name: conda_upload
     command: |
-       if [[ $CIRCLE_BRANCH != 'revisit_run_tests' ]]; then
+       if [[ $CIRCLE_BRANCH != 'master' ]]; then
           exit 0
        fi
        export PATH=${HOME}/project/$WORKDIR/miniconda/bin:$PATH
@@ -66,7 +66,7 @@ aliases:
        export PKG_NAME=cdutil
        export USER=cdat
        export VERSION=8.0
-       export LABEL=unstable
+       export LABEL=nightly
        python ./prep_for_build.py -l $VERSION
        conda build $PKG_NAME -c cdat/label/nightly -c conda-forge -c cdat 
        conda build $PKG_NAME -c cdat/label/nightly -c conda-forge -c cdat --python=3.6
