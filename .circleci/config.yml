@@ -20,8 +20,8 @@ aliases:
        conda config --set always_yes yes --set changeps1 no
        conda update -y -q conda
        conda config --set anaconda_upload no
-       conda create -n py3 -c cdat/label/nightly -c conda-forge -c cdat nose flake8 "numpy=1.14" "python>3" cdat_info testsrunner
-       conda create -n py2 -c cdat/label/nightly -c conda-forge -c cdat nose flake8 "numpy=1.14" "python<3" cdat_info testsrunner
+       conda create -n py3 -c cdat/label/nightly -c conda-forge -c cdat genutil nose flake8 "numpy=1.14" "python>3" cdat_info testsrunner
+       conda create -n py2 -c cdat/label/nightly -c conda-forge -c cdat genutil nose flake8 "numpy=1.14" "python<3" cdat_info testsrunner
 
   - &setup_cdutil
     name: setup_cdutil
