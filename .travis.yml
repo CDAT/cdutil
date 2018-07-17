@@ -18,7 +18,7 @@ before_install:
   #- conda install gcc
 script:
 # =======
-- conda create -n py2 -c cdat/label/nightly -c conda-forge genutil nose flake8 numpy esmpy "python<3"
+- conda create -n py2 -c cdat/label/nightly -c conda-forge -c cdat genutil nose flake8 "numpy=1.14" "python<3" cdat_info testsrunner
 - export UVCDAT_ANONYMOUS_LOG=False
 - echo $TRAVIS_BRANCH
 - export TRAVIS_PR_BRANCH=$TRAVIS_BRANCH
@@ -28,7 +28,7 @@ script:
 - python setup.py install 
 - python run_tests.py -v2
 - rm -rf build
-- conda create -n py3 -c cdat/label/nightly -c conda-forge genutil nose flake8 numpy esmpy "python>3"
+- conda create -n py3 -c cdat/label/nightly -c conda-forge -c cdat genutil nose flake8 "numpy=1.14" "python>3" cdat_info testsrunner
 - source activate py3
 - python setup.py install 
 - python run_tests.py -v2
