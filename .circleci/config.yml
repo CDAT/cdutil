@@ -9,7 +9,7 @@ aliases:
   - &init
     name: init
     command: |
-      mkdir $CIRCLE_WORKING_DIRECTORY/cdutil
+      mkdir -p $CIRCLE_WORKING_DIRECTORY/cdutil
       cd $CIRCLE_WORKING_DIRECTORY/cdutil
 
   - &setup_miniconda
