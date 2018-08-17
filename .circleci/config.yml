@@ -6,6 +6,12 @@ checkout:
         
 aliases:
 
+  - &init
+    name: init
+    command: |
+      mkdir $CIRCLE_WORKING_DIRECTORY/cdutil
+      cd $CIRCLE_WORKING_DIRECTORY/cdutil
+
   - &setup_miniconda
     name: setup_miniconda
     command: |
@@ -91,8 +97,8 @@ jobs:
       WORKDIR: "workspace/test_macos_cdutil"
       OS: "osx-64"
     steps:
-      - checkout:
-          path: $CIRCLE_WORKING_DIRECTORY/cdutil
+      - run: *init
+      - checkout
       - run: *setup_miniconda
       - run: *create_conda_env
       - run: *setup_cdutil
@@ -110,8 +116,8 @@ jobs:
       OS: "linux-64"
       COVERAGE: "-c"
     steps:
-      - checkout:
-          path: $CIRCLE_WORKING_DIRECTORY/cdutil
+      - run: *init
+      - checkout
       - run: *setup_miniconda
       - run: *create_conda_env
       - run: *setup_cdutil
