@@ -1,3 +1,3 @@
 {
-   "include": ["cdutil", "cdms2", "genutil", "cdat_info", "testsrunner"]
+   "include": ["cdutil"]
 }
