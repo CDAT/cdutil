@@ -28,7 +28,6 @@ aliases:
     command: |
        export PATH=$WORKDIR/miniconda/bin:$PATH
        export UVCDAT_ANONYMOUS_LOG=False
-       cd $WORKDIR/cdutil
        source activate py3
        python setup.py install
        source activate py2
@@ -41,7 +40,6 @@ aliases:
        export PATH=$WORKDIR/miniconda/bin:$PATH
        export UVCDAT_ANONYMOUS_LOG=False
        set -e
-       cd $WORKDIR/cdutil
        source activate py2
        python run_tests.py -v2 -H 
        RESULT=$?
@@ -78,7 +76,6 @@ aliases:
     name: run_coveralls
     command: |
        export PATH=$WORKDIR/miniconda/bin:$PATH
-       cd $CIRCLE_WORKING_DIRECTORY/cdutil
        source activate py3
        coveralls
        source deactivate
@@ -91,8 +88,7 @@ jobs:
       WORKDIR: "workspace/test_macos_cdutil"
       OS: "osx-64"
     steps:
-      - checkout:
-          path: $WORKDIR/cdutil
+      - checkout
       - run: *setup_miniconda
       - run: *create_conda_env
       - run: *setup_cdutil
@@ -110,8 +106,7 @@ jobs:
       OS: "linux-64"
       COVERAGE: "-c"
     steps:
-      - checkout:
-          path: $WORKDIR/cdutil
+      - checkout
       - run: *setup_miniconda
       - run: *create_conda_env
       - run: *setup_cdutil
