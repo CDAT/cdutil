@@ -88,7 +88,8 @@ jobs:
       WORKDIR: "workspace/test_macos_cdutil"
       OS: "osx-64"
     steps:
-      - checkout
+      - checkout:
+          path: $CIRCLE_WORKING_DIRECTORY/cdutil
       - run: *setup_miniconda
       - run: *create_conda_env
       - run: *setup_cdutil
@@ -106,7 +107,8 @@ jobs:
       OS: "linux-64"
       COVERAGE: "-c"
     steps:
-      - checkout
+      - checkout:
+          path: $CIRCLE_WORKING_DIRECTORY/cdutil
       - run: *setup_miniconda
       - run: *create_conda_env
       - run: *setup_cdutil
