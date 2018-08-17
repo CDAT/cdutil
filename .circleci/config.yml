@@ -6,12 +6,6 @@ checkout:
         
 aliases:
 
-  - &init
-    name: init
-    command: |
-      mkdir -p $CIRCLE_WORKING_DIRECTORY/cdutil
-      cd $CIRCLE_WORKING_DIRECTORY/cdutil
-
   - &setup_miniconda
     name: setup_miniconda
     command: |
@@ -34,7 +28,6 @@ aliases:
     command: |
        export PATH=$WORKDIR/miniconda/bin:$PATH
        export UVCDAT_ANONYMOUS_LOG=False
-       cd $CIRCLE_WORKING_DIRECTORY/cdutil
        source activate py3
        python setup.py install
        source activate py2
@@ -46,7 +39,6 @@ aliases:
     command: |
        export PATH=$WORKDIR/miniconda/bin:$PATH
        export UVCDAT_ANONYMOUS_LOG=False
-       cd $CIRCLE_WORKING_DIRECTORY/cdutil
        set -e
        source activate py2
        python run_tests.py -v2 -H 
@@ -97,9 +89,8 @@ jobs:
       WORKDIR: "workspace/test_macos_cdutil"
       OS: "osx-64"
     steps:
-      - run: *init
       - checkout:
-          path: $CIRCLE_WORKING_DIRECTORY/cdutil
+          path: $WORKDIR/cdutil
       - run: *setup_miniconda
       - run: *create_conda_env
       - run: *setup_cdutil
@@ -117,9 +108,8 @@ jobs:
       OS: "linux-64"
       COVERAGE: "-c"
     steps:
-      - run: *init
       - checkout:
-          path: $CIRCLE_WORKING_DIRECTORY/cdutil
+          path: $WORKDIR/cdutil
       - run: *setup_miniconda
       - run: *create_conda_env
       - run: *setup_cdutil
