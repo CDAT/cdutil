@@ -28,6 +28,7 @@ aliases:
     command: |
        export PATH=$WORKDIR/miniconda/bin:$PATH
        export UVCDAT_ANONYMOUS_LOG=False
+       cd $CIRCLE_WORKING_DIRECTORY/cdutil
        source activate py3
        python setup.py install
        source activate py2
@@ -39,6 +40,7 @@ aliases:
     command: |
        export PATH=$WORKDIR/miniconda/bin:$PATH
        export UVCDAT_ANONYMOUS_LOG=False
+       cd $CIRCLE_WORKING_DIRECTORY/cdutil
        set -e
        source activate py2
        python run_tests.py -v2 -H 
@@ -76,6 +78,7 @@ aliases:
     name: run_coveralls
     command: |
        export PATH=$WORKDIR/miniconda/bin:$PATH
+       cd $CIRCLE_WORKING_DIRECTORY/cdutil
        source activate py3
        coveralls
        source deactivate
