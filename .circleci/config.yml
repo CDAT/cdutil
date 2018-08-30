@@ -104,7 +104,7 @@ jobs:
     environment:
       WORKDIR: "workspace/test_linux_cdutil"
       OS: "linux-64"
-      COVERAGE: "-c"
+      COVERAGE: "-c tests/coverage.json"
     steps:
       - checkout
       - run: *setup_miniconda
