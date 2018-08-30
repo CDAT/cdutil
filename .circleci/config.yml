@@ -15,24 +15,28 @@ aliases:
       
   - &create_conda_env
     name: create_conda_env
+    environment:
+       PKGS: "genutil nose flake8 'numpy=1.14' cdat_info testsrunner"
     command: |
        export PATH=$WORKDIR/miniconda/bin:$PATH
        conda config --set always_yes yes --set changeps1 no
        conda update -y -q conda
        conda config --set anaconda_upload no
-       conda create -n py3 -c cdat/label/linatest -c cdat/label/nightly -c conda-forge -c cdat genutil nose flake8 "numpy=1.14" "python>3" cdat_info testsrunner coverage coveralls
-       conda create -n py2 -c cdat/label/nightly -c conda-forge -c cdat genutil nose flake8 "numpy=1.14" "python<3" cdat_info testsrunner
+       if [ $PY_VER = "py2" ]
+       then
+          conda create -n py2 -c cdat/label/nightly -c conda-forge -c cdat $PKGS "python<3"
+       else
+          conda create -n py3 -c cdat/label/linatest -c cdat/label/nightly -c conda-forge -c cdat $PKGS "python>3" coverage coveralls
+       fi 
 
   - &setup_cdutil
     name: setup_cdutil
     command: |
        export PATH=$WORKDIR/miniconda/bin:$PATH
        export UVCDAT_ANONYMOUS_LOG=False
-       source activate py3
+       source activate $PY_VER
        python setup.py install
-       source activate py2
        rm -rf build
-       python setup.py install
 
   - &run_cdutil_tests
     name: run_cdutil_tests
@@ -40,15 +44,10 @@ aliases:
        export PATH=$WORKDIR/miniconda/bin:$PATH
        export UVCDAT_ANONYMOUS_LOG=False
        set -e
-       source activate py2
-       python run_tests.py -v2 -H 
+       source activate $PY_VER
+       python run_tests.py -v2 -H $COVERAGE 
        RESULT=$?
-       echo "*** py2 test result: "${RESULT}
-       source activate py3
-       python run_tests.py -v2 -H $COVERAGE
-       PY3_RESULT=$?
-       echo "*** py3 test result: "${PY3_RESULT}
-       RESULT=$(( $RESULT + $PY3_RESULT))
+       echo "*** $PY_VER test result: "${RESULT}
        exit $RESULT
 
   - &conda_upload
@@ -76,17 +75,18 @@ aliases:
     name: run_coveralls
     command: |
        export PATH=$WORKDIR/miniconda/bin:$PATH
-       source activate py3
+       source activate $PY_VER
        coveralls
        source deactivate
 
 jobs:
-  macos_cdutil:
+  macos_cdutil_py2:
     macos:
       xcode: "9.2.0"
     environment:
-      WORKDIR: "workspace/test_macos_cdutil"
+      WORKDIR: "workspace/test_macos_cdutil_py2"
       OS: "osx-64"
+      PY_VER: "py2"
     steps:
       - checkout
       - run: *setup_miniconda
@@ -98,12 +98,50 @@ jobs:
           path: tests_html
           destination: tests_html
 
-  linux_cdutil:
+  macos_cdutil_py3:
+    macos:
+      xcode: "9.2.0"
+    environment:
+      WORKDIR: "workspace/test_macos_cdutil_py3"
+      OS: "osx-64"
+      PY_VER: "py3"
+    steps:
+      - checkout
+      - run: *setup_miniconda
+      - run: *create_conda_env
+      - run: *setup_cdutil
+      - run: *run_cdutil_tests
+      - run: *conda_upload
+      - store_artifacts:
+          path: tests_html
+          destination: tests_html
+
+  linux_cdutil_py2:
     machine:
       image: circleci/classic:latest
     environment:
-      WORKDIR: "workspace/test_linux_cdutil"
+      WORKDIR: "workspace/test_linux_cdutil_py2"
       OS: "linux-64"
+      PY_VER: "py2"
+    steps:
+      - checkout
+      - run: *setup_miniconda
+      - run: *create_conda_env
+      - run: *setup_cdutil
+      - run: *run_cdutil_tests
+      - run: *run_coveralls
+      - run: *conda_upload
+      - store_artifacts:
+          path: tests_html
+          destination: tests_html
+
+  linux_cdutil_py3:
+    machine:
+      image: circleci/classic:latest
+    environment:
+      WORKDIR: "workspace/test_linux_cdutil_py3"
+      OS: "linux-64"
+      PY_VER: "py3"
       COVERAGE: "-c tests/coverage.json"
     steps:
       - checkout
@@ -121,7 +159,16 @@ workflows:
   version: 2
   cdutil:
     jobs:
-      - macos_cdutil
-      - linux_cdutil
+      - macos_cdutil_py2
+      - macos_cdutil_py3:
+           requires:
+              - macos_cdutil_py2
+      - linux_cdutil_py2
+      - linux_cdutil_py3:
+           requires:
+              - linux_cdutil_py2
+
+
+
 
        
