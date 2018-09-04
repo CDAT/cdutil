@@ -26,14 +26,14 @@ aliases:
        then
           conda create -n py2 -c cdat/label/nightly -c conda-forge -c cdat $PKGS "python<3"
        else
-          conda create -n py3 -c cdat/label/linatest -c cdat/label/nightly -c conda-forge -c cdat $PKGS "python>3" coverage coveralls
+          conda create -n py3 -c cdat/label/nightly -c conda-forge -c cdat $PKGS "python>3" coverage coveralls
        fi 
 
   - &setup_cdutil
     name: setup_cdutil
     command: |
        export PATH=$WORKDIR/miniconda/bin:$PATH
-       export UVCDAT_ANONYMOUS_LOG=False
+       export CDAT_ANONYMOUS_LOG=False
        source activate $PY_VER
        python setup.py install
        rm -rf build
@@ -42,7 +42,7 @@ aliases:
     name: run_cdutil_tests
     command: |
        export PATH=$WORKDIR/miniconda/bin:$PATH
-       export UVCDAT_ANONYMOUS_LOG=False
+       export CDAT_ANONYMOUS_LOG=False
        set -e
        source activate $PY_VER
        python run_tests.py -v2 -H $COVERAGE 
