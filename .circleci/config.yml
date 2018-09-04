@@ -17,16 +17,16 @@ aliases:
     name: create_conda_env
     environment:
        PKGS: "genutil nose flake8 'numpy=1.14' cdat_info testsrunner"
+       CHANNELS: "-c cdat/label/nightly -c conda-forge -c cdat"
     command: |
        export PATH=$WORKDIR/miniconda/bin:$PATH
        conda config --set always_yes yes --set changeps1 no
        conda update -y -q conda
        conda config --set anaconda_upload no
-       if [ $PY_VER = "py2" ]
-       then
-          conda create -n py2 -c cdat/label/nightly -c conda-forge -c cdat $PKGS "python<3"
+       if [[ $PY_VER = "py2" ]]; then
+          conda create -n $PY_VER $PKGS "python<3"
        else
-          conda create -n py3 -c cdat/label/nightly -c conda-forge -c cdat $PKGS "python>3" coverage coveralls
+          conda create -n $PY_VER $PKGS "python>3" coverage coveralls
        fi 
 
   - &setup_cdutil
@@ -52,6 +52,8 @@ aliases:
 
   - &conda_upload
     name: conda_upload
+    environment:
+       CHANNELS: "-c cdat/label/nightly -c conda-forge -c cdat"
     command: |
        if [[ $CIRCLE_BRANCH != 'master' ]]; then
           exit 0
@@ -67,8 +69,11 @@ aliases:
        export VERSION=8.0
        export LABEL=nightly
        python ./prep_for_build.py -l $VERSION
-       conda build $PKG_NAME -c cdat/label/nightly -c conda-forge -c cdat 
-       conda build $PKG_NAME -c cdat/label/nightly -c conda-forge -c cdat --python=3.6
+       if [[ $PY_VER = 'py2' ]]; then
+          conda build $PKG_NAME $CHANNELS
+       else
+          conda build $PKG_NAME $CHANNELS --python=3.6
+       fi
        anaconda -t $CONDA_UPLOAD_TOKEN upload -u $USER -l $LABEL $CONDA_BLD_PATH/$OS/$PKG_NAME-$VERSION.`date +%Y*`0.tar.bz2 --force
 
   - &run_coveralls
