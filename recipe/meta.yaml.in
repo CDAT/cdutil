@@ -1,0 +1,25 @@
+package:
+    name: cdutil
+    version: @VERSION@
+
+source:
+    git_rev: @UVCDAT_BRANCH@
+    git_url: git://github.com/CDAT/cdutil.git
+
+build:
+  number: @BUILD_NUMBER@
+ 
+requirements:
+  build:
+    - python
+    - setuptools
+  run:
+    - python
+    - cdms2
+    - genutil
+
+about:
+    home:  http://github.com/CDAT/cdutil
+    license: BSD
+    license_file: bsd-3-clause.txt
+
