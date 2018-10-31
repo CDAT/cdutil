@@ -8,6 +8,8 @@ source:
 
 build:
   number: @BUILD_NUMBER@
+  noarch: python
+  script: python setup.py install
  
 requirements:
   build:
@@ -20,6 +22,7 @@ requirements:
 
 about:
     home:  http://github.com/CDAT/cdutil
+    summary: A set of tools to manipulate climate data
     license: BSD
     license_file: bsd-3-clause.txt
 
