@@ -68,13 +68,13 @@ aliases:
        export USER=cdat
        export VERSION=8.0
        export LABEL=nightly
-       python ./prep_for_build.py -l $VERSION
-       if [[ $PY_VER = 'py2' ]]; then
-          conda build $PKG_NAME $CHANNELS
-       else
-          conda build $PKG_NAME $CHANNELS --python=3.6
+       if [[ -d $PKG_NAME ]]; then
+          rm -rf $PKG_NAME
        fi
-       anaconda -t $CONDA_UPLOAD_TOKEN upload -u $USER -l $LABEL $CONDA_BLD_PATH/$OS/$PKG_NAME-$VERSION.`date +%Y*`0.tar.bz2 --force
+       ln -s ../recipe $PKG_NAME
+       python ./prep_for_build.py -l $VERSION
+       conda build $PKG_NAME $CHANNELS
+       anaconda -t $CONDA_UPLOAD_TOKEN upload -u $USER -l $LABEL $CONDA_BLD_PATH/noarch/$PKG_NAME-$VERSION.`date +%Y*`0.tar.bz2 --force
 
   - &run_coveralls
     name: run_coveralls
@@ -98,7 +98,6 @@ jobs:
       - run: *create_conda_env
       - run: *setup_cdutil
       - run: *run_cdutil_tests
-      - run: *conda_upload
       - store_artifacts:
           path: tests_html
           destination: tests_html
@@ -116,7 +115,6 @@ jobs:
       - run: *create_conda_env
       - run: *setup_cdutil
       - run: *run_cdutil_tests
-      - run: *conda_upload
       - store_artifacts:
           path: tests_html
           destination: tests_html
@@ -134,7 +132,6 @@ jobs:
       - run: *create_conda_env
       - run: *setup_cdutil
       - run: *run_cdutil_tests
-      - run: *conda_upload
       - store_artifacts:
           path: tests_html
           destination: tests_html
@@ -146,7 +143,7 @@ jobs:
       WORKDIR: "workspace/test_linux_cdutil_py3"
       OS: "linux-64"
       PY_VER: "py3"
-      COVERAGE: "-c tests/coverage.json"
+      COVERAGE: "-c tests/coverage.json --coverage-from-egg"
     steps:
       - checkout
       - run: *setup_miniconda

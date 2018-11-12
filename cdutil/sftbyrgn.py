@@ -10,6 +10,10 @@ import genutil
 import cdms2
 import os
 import cdat_info
+import pkg_resources
+
+
+egg_path = pkg_resources.resource_filename(pkg_resources.Requirement.parse("cdutil"), "share/cdutil")
 
 
 def sumregions(potential_reg, potential):
@@ -85,9 +89,7 @@ def generateSurfaceTypeByRegionMask(mask, sftbyrgn=None, sftbyrgnmask=215, regio
     if sftbyrgn is None:
         sftbyrgn = cdms2.open(
             os.path.join(
-                cdat_info.get_prefix(),
-                'share',
-                'cdutil',
+                egg_path,
                 'sftbyrgn.nc'))('sftbyrgn')
 
     if regions is None:

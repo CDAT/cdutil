@@ -1,11 +1,13 @@
 import cdms2,sys,cdutil,os,cdat_info
 import unittest
 import numpy
+import pkg_resources
+egg_path = pkg_resources.resource_filename(pkg_resources.Requirement.parse("cdutil"), "share/cdutil")
 
 class CDUTIL(unittest.TestCase):
     def testGenmask(self):
 
-        f=cdms2.open(os.path.join(sys.prefix,"share","cdutil","navy_land.nc"))
+        f=cdms2.open(os.path.join(egg_path, "navy_land.nc"))
         navy_frac_one = f('sftlf')
         g = navy_frac_one.getGrid()
         print(("SOURCE GRID:",g))

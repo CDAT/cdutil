@@ -2,6 +2,9 @@ import cdms2
 import MV2
 import os
 import cdat_info
+import pkg_resources
+
+egg_path = pkg_resources.resource_filename(pkg_resources.Requirement.parse("cdutil"), "share/cdutil")
 
 
 def create_surrounds(data):
@@ -199,9 +202,7 @@ def generateLandSeaMask(target, source=None, threshold_1=.2,
     if source is None:
         source = cdms2.open(
             os.path.join(
-                cdat_info.get_prefix(),
-                'share',
-                'cdutil',
+                egg_path,
                 'navy_land.nc'))('sftlf')
 
     try:
