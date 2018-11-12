@@ -146,7 +146,7 @@ jobs:
       WORKDIR: "workspace/test_linux_cdutil_py3"
       OS: "linux-64"
       PY_VER: "py3"
-      COVERAGE: "-c tests/coverage.json"
+      COVERAGE: "-c tests/coverage.json --coverage-from-egg"
     steps:
       - checkout
       - run: *setup_miniconda
