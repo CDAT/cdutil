@@ -13,8 +13,6 @@ Newsftbyrgn
 import cdms2,cdutil,MV2,os,sys,cdat_info
 import unittest
 import numpy
-numpy.set_printoptions(threshold='nan')
-import pprint
 
 class CDUTIL(unittest.TestCase):
     def testSftbyrgn(self):
