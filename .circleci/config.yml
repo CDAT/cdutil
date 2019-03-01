@@ -16,8 +16,8 @@ aliases:
   - &create_conda_env
     name: create_conda_env
     environment:
-       PKGS: "genutil nose flake8 'numpy=1.14' cdat_info testsrunner"
-       CHANNELS: "-c cdat/label/nightly -c conda-forge -c cdat"
+       PKGS: "genutil nose flake8 numpy cdat_info testsrunner"
+       CHANNELS: "-c cdat/label/nightly -c conda-forge"
     command: |
        export PATH=$WORKDIR/miniconda/bin:$PATH
        conda config --set always_yes yes --set changeps1 no
@@ -161,13 +161,13 @@ workflows:
   cdutil:
     jobs:
       - macos_cdutil_py2
-      - macos_cdutil_py3:
-           requires:
-              - macos_cdutil_py2
+      - macos_cdutil_py3
+          #     requires:
+          #    - macos_cdutil_py2
       - linux_cdutil_py2
-      - linux_cdutil_py3:
-           requires:
-              - linux_cdutil_py2
+      - linux_cdutil_py3
+          #requires:
+          #    - linux_cdutil_py2
 
 
 
