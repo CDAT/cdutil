@@ -161,13 +161,13 @@ workflows:
   cdutil:
     jobs:
       - macos_cdutil_py2
-      - macos_cdutil_py3:
-           requires:
-              - macos_cdutil_py2
+      - macos_cdutil_py3
+          #     requires:
+          #    - macos_cdutil_py2
       - linux_cdutil_py2
-      - linux_cdutil_py3:
-           requires:
-              - linux_cdutil_py2
+      - linux_cdutil_py3
+          #requires:
+          #    - linux_cdutil_py2
 
 
 
