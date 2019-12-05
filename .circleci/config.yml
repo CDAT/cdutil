@@ -15,7 +15,7 @@ aliases:
   - &create_conda_env
     name: create_conda_env
     environment:
-      PKGS: "genutil nose flake8 numpy cdat_info testsrunner"
+      PKGS: "genutil nose flake8 numpy cdat_info testsrunner 'libnetcdf=4.6.2'"
       CHANNELS: "-c cdat/label/nightly -c conda-forge"
     command: |
       export PATH=$WORKDIR/miniconda/bin:$PATH
