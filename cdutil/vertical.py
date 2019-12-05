@@ -32,9 +32,9 @@ def reconstructPressureFromHybrid(ps, A, B, Po):
             >>> P=reconstructPressureFromHybrid(ps,A,B,Po)
     """
     # Compute the pressure for the sigma levels
-    cdat_info.pingPCMDIdb(
-        "cdat",
-        "cdutil.vertical.reconstructPressureFromHybrid")
+    #cdat_info.pingPCMDIdb(
+    #    "cdat",
+    #    "cdutil.vertical.reconstructPressureFromHybrid")
     ps, B = genutil.grower(ps, B)
     ps, A = genutil.grower(ps, A)
     p = ps * B

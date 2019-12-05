@@ -271,7 +271,7 @@ class DomainComponent(SelectorComponent):
 def domain(*args, **kargs):
     """construct the selector"""
     import cdms2 as cdms
-    cdat_info.pingPCMDIdb("cdat", "cdutil.region.domain")
+    #cdat_info.pingPCMDIdb("cdat", "cdutil.region.domain")
     a = cdms.selectors.Selector(DomainComponent(*args, **kargs))
     return a
 

@@ -80,7 +80,7 @@ def generateSurfaceTypeByRegionMask(mask, sftbyrgn=None, sftbyrgnmask=215, regio
         http://www-pcmdi.llnl.gov/publications/pdf/34.pdf
     """
 
-    cdat_info.pingPCMDIdb("cdat", "cdutil.generateSurfaceTypeByRegionMask")
+    #cdat_info.pingPCMDIdb("cdat", "cdutil.generateSurfaceTypeByRegionMask")
     # OK first determine which regions are available
     # Must be integer values
     if isinstance(mask, cdms2.grid.TransientRectGrid):
