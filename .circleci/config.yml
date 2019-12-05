@@ -32,7 +32,6 @@ aliases:
     name: setup_cdutil
     command: |
       export PATH=$WORKDIR/miniconda/bin:$PATH
-      export CDAT_ANONYMOUS_LOG=False
       source activate $PY_VER
       python setup.py install
       rm -rf build
@@ -41,7 +40,6 @@ aliases:
     name: run_cdutil_tests
     command: |
       export PATH=$WORKDIR/miniconda/bin:$PATH
-      export CDAT_ANONYMOUS_LOG=False
       set -e
       source activate $PY_VER
       python run_tests.py -v2 -H $COVERAGE 

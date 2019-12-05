@@ -32,9 +32,6 @@ def reconstructPressureFromHybrid(ps, A, B, Po):
             >>> P=reconstructPressureFromHybrid(ps,A,B,Po)
     """
     # Compute the pressure for the sigma levels
-    #cdat_info.pingPCMDIdb(
-    #    "cdat",
-    #    "cdutil.vertical.reconstructPressureFromHybrid")
     ps, B = genutil.grower(ps, B)
     ps, A = genutil.grower(ps, A)
     p = ps * B
@@ -89,7 +86,6 @@ def linearInterpolation(
             >>> A=interpolate(A,I) # interpolates A over default levels
     """
 
-    cdat_info.pingPCMDIdb("cdat", "cdutil.vertical.linearInterpolation")
     try:
         nlev = len(levels)  # Number of pressure levels
     except BaseException:
@@ -205,7 +201,6 @@ def logLinearInterpolation(
             >>> A=logLinearInterpolation(A,P) # interpolate A using pressure field P over the default levels
     """
 
-    cdat_info.pingPCMDIdb("cdat", "cdutil.vertical.logLinearInterpolation")
     try:
         nlev = len(levels)  # Number of pressure levels
     except BaseException:
