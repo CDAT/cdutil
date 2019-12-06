@@ -191,7 +191,6 @@ def generateLandSeaMask(target, source=None, threshold_1=.2,
 
     :returns: landsea mask on target grid
     """
-    cdat_info.pingPCMDIdb("cdat", "cdutil.generateLandSeaMask")
     if cdms2.isVariable(target):
         target = target.getGrid()
         if target is None:

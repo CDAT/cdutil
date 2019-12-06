@@ -8,4 +8,3 @@ from .vertical import sigma2Pressure, reconstructPressureFromHybrid, logLinearIn
 from .create_landsea_mask import generateLandSeaMask  # noqa
 from .sftbyrgn import generateSurfaceTypeByRegionMask  # noqa
 import cdat_info  # noqa
-cdat_info.pingPCMDIdb("cdat", "cdutil")
