@@ -14,15 +14,32 @@ build:
 requirements:
   build:
     - python
+    - pip 
     - setuptools
+    - cdat_info
   run:
     - python
     - cdms2
     - genutil
+    - cdat_info
+
+test:
+  commands:
+    - python -c "import cdutil"
 
 about:
-    home:  http://github.com/CDAT/cdutil
+    home: http://github.com/CDAT/cdutil
     summary: A set of tools to manipulate climate data
     license: BSD
     license_file: bsd-3-clause.txt
+
+extra:
+  recipe-maintainers:
+    - dnadeau4
+    - doutriaux1
+    - xylar
+    - downiec
+    - muryanto1
+    - jasonb5
+
 
