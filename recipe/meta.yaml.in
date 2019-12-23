@@ -13,12 +13,12 @@ build:
  
 requirements:
   build:
-    - python
+    - python {{ python }}
     - pip 
     - setuptools
     - cdat_info
   run:
-    - python
+    - python {{ python }}
     - cdms2
     - genutil
     - cdat_info
