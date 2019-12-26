@@ -54,7 +54,7 @@ aliases:
     command: |
        ##if [[ $CIRCLE_BRANCH != "master" ]]; then
        #   exit 0
-       #fi
+       ##fi
        source $WORKDIR/miniconda/etc/profile.d/conda.sh
        conda activate base
        UPLOAD_OPTIONS="-t $CONDA_UPLOAD_TOKEN upload -u $USER -l $LABEL"
