@@ -32,7 +32,7 @@ aliases:
   - &setup_run_tests
     name: setup_run_tests
     environment:
-       PKGS: "genutil numpy cdat_info testsrunner 'libnetcdf=4.6.2'"
+       PKGS: "genutil numpy cdat_info testsrunner"
        CHANNELS: "-c cdat/label/nightly -c conda-forge"
     command: |
        source $WORKDIR/miniconda/etc/profile.d/conda.sh
@@ -52,9 +52,9 @@ aliases:
   - &conda_upload
     name: conda_upload
     command: |
-       ####if [[ $CIRCLE_BRANCH != "master" ]]; then
+       #if [[ $CIRCLE_BRANCH != "master" ]]; then
        #   exit 0
-       ##fi
+       #fi
        source $WORKDIR/miniconda/etc/profile.d/conda.sh
        conda activate base
        UPLOAD_OPTIONS="-t $CONDA_UPLOAD_TOKEN upload -u $USER -l $LABEL"
