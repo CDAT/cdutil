@@ -12,7 +12,7 @@ aliases:
   - &conda_rerender
     name: conda_rerender
     command: |
-       git clone -b conda_forge_pinning https://github.com/CDAT/conda-recipes.git $WORKDIR/conda-recipes 
+       git clone https://github.com/CDAT/conda-recipes.git $WORKDIR/conda-recipes 
        source $WORKDIR/miniconda/etc/profile.d/conda.sh
        conda activate base
        BUILD_SCRIPT="$WORKDIR/conda-recipes/build_tools/conda_build.py"
@@ -69,34 +69,159 @@ aliases:
        conda deactivate
 
 jobs:
-   linux_cdutil:
-      machine:
-         image: circleci/classic:latest
+   macos_setup:
+      macos:
+         xcode: "11.3.0"
       environment:
-         WORKDIR: "/home/circleci/project/workdir"
+         WORKDIR: /Users/distiller/project/macos_build
          PKG_NAME: "cdutil"
-         ENV_NAME: "test_cdutil"
+         REPO_NAME: "cdutil"
          LAST_STABLE: "8.2"
-         CONDA_PY_VER: "python>=3.7,<3.8"
          BUILD_VARIANT_VER: "noarch"
-         COVERAGE: "-c tests/coverage.json --coverage-from-egg"
-         COVERAGE_PKGS: "coverage coveralls"
-         # for conda_upload
-         VERSION: "8.2"
-         USER: "cdat"
-         LABEL: "nightly"
       steps:
          - checkout
          - run: *setup_miniconda
          - run: *conda_rerender
          - run: *conda_build
+         - persist_to_workspace:
+              root: .
+              paths: 
+                 - macos_build
+
+   linux_setup:
+      machine:
+         image: circleci/classic:latest
+      environment:
+         WORKDIR: /home/circleci/project/linux_build
+         PKG_NAME: "cdutil"
+         REPO_NAME: "cdutil"
+         LAST_STABLE: "8.2"
+         BUILD_VARIANT_VER: "noarch"
+      steps:
+         - checkout
+         - run: *setup_miniconda
+         - run: *conda_rerender
+         - run: *conda_build
+         - persist_to_workspace:
+              root: .
+              paths:
+                 - linux_build
+
+   macos_cdutil_py2:
+      macos:
+         xcode: "11.3.0"
+      environment:
+         WORKDIR: /Users/distiller/project/macos_build
+         PKG_NAME: "cdutil"
+         REPO_NAME: "cdutil"
+         ENV_NAME: "test_cdutil"
+         CONDA_PY_VER: "python<3"
+      steps:
+         - checkout
+         - attach_workspace:
+              at: .
+         - run: *setup_run_tests
+         - run: *run_tests
+         - store_artifacts:
+              path: tests_html
+              destination: tests_html
+
+   macos_cdutil_py37:
+      macos:
+         xcode: "11.3.0"
+      environment:
+         WORKDIR: /Users/distiller/project/macos_build
+         PKG_NAME: "cdutil"
+         REPO_NAME: "cdutil"
+         ENV_NAME: "test_cdutil"
+         CONDA_PY_VER: "python>=3.7,<3.8"
+      steps:
+         - checkout
+         - attach_workspace:
+              at: .
+         - run: *setup_run_tests
+         - run: *run_tests
+         - store_artifacts:
+              path: tests_html
+              destination: tests_html
+
+   linux_cdutil_py2:
+      machine:
+         image: circleci/classic:latest
+      environment:
+         WORKDIR: /home/circleci/project/linux_build
+         PKG_NAME: "cdutil"
+         REPO_NAME: "cdutil"
+         ENV_NAME: "test_cdutil"
+         CONDA_PY_VER: "python<3"
+      steps:
+         - checkout
+         - attach_workspace:
+              at: .
+         - run: *setup_run_tests
+         - run: *run_tests
+         - store_artifacts:
+              path: tests_html
+              destination: tests_html
+
+   linux_cdutil_py37:
+      machine:
+         image: circleci/classic:latest
+      environment:
+         WORKDIR: /home/circleci/project/linux_build
+         PKG_NAME: "cdutil"
+         REPO_NAME: "cdutil"
+         ENV_NAME: "test_cdutil"
+         CONDA_PY_VER: "python>=3.7,<3.8"
+         COVERAGE: "-c tests/coverage.json --coverage-from-egg"
+         COVERAGE_PKGS: "coverage coveralls"
+      steps:
+         - checkout
+         - attach_workspace:
+              at: .
          - run: *setup_run_tests
          - run: *run_tests
          - run: *run_coveralls
+         - store_artifacts:
+              path: tests_html
+              destination: tests_html
+
+   upload:
+      machine:
+         image: circleci/classic:latest
+      environment:
+         WORKDIR: /home/circleci/project/linux_build
+         PKG_NAME: "cdutil"
+         VERSION: "8.2"
+         USER: "cdat"
+         LABEL: "nightly"
+      steps:
+         - attach_workspace:
+              at: .
+         - run: pwd
          - run: *conda_upload
 
 workflows:
    version: 2
    cdutil:
       jobs:
-         - linux_cdutil
+         - macos_setup
+         - linux_setup
+         - macos_cdutil_py2:
+              requires:
+                 - macos_setup
+         - macos_cdutil_py37:
+              requires:
+                 - macos_setup
+         - linux_cdutil_py2:
+              requires:
+                 - linux_setup
+         - linux_cdutil_py37:
+              requires:
+                 - linux_setup
+         - upload:
+              requires:
+                 - macos_cdutil_py2
+                 - macos_cdutil_py37
+                 - linux_cdutil_py2
+                 - linux_cdutil_py37
