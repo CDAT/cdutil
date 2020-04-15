@@ -5,7 +5,7 @@ aliases:
     name: setup_miniconda
     command: |
        mkdir -p workspace
-       git clone -b validateNightly git@github.com:CDAT/cdat workspace/cdat
+       git clone -b validateNightlyNew git@github.com:CDAT/cdat workspace/cdat
        # install_miniconda.py installs miniconda3 under $WORKDIR/miniconda
        python workspace/cdat/scripts/install_miniconda.py -w $WORKDIR -p 'py3'
 
@@ -71,7 +71,7 @@ aliases:
 jobs:
    macos_setup:
       macos:
-         xcode: "11.3.0"
+         xcode: "11.4.0"
       environment:
          WORKDIR: /Users/distiller/project/macos_build
          PKG_NAME: "cdutil"
@@ -107,15 +107,15 @@ jobs:
               paths:
                  - linux_build
 
-   macos_cdutil_py2:
+   macos_cdutil_py36:
       macos:
-         xcode: "11.3.0"
+         xcode: "11.4.0"
       environment:
          WORKDIR: /Users/distiller/project/macos_build
          PKG_NAME: "cdutil"
          REPO_NAME: "cdutil"
          ENV_NAME: "test_cdutil"
-         CONDA_PY_VER: "python<3"
+         CONDA_PY_VER: "python>=3.6,<3.7"
       steps:
          - checkout
          - attach_workspace:
@@ -128,7 +128,7 @@ jobs:
 
    macos_cdutil_py37:
       macos:
-         xcode: "11.3.0"
+         xcode: "11.4.0"
       environment:
          WORKDIR: /Users/distiller/project/macos_build
          PKG_NAME: "cdutil"
@@ -145,7 +145,26 @@ jobs:
               path: tests_html
               destination: tests_html
 
-   linux_cdutil_py2:
+   macos_cdutil_py38:
+      macos:
+         xcode: "11.4.0"
+      environment:
+         WORKDIR: /Users/distiller/project/macos_build
+         PKG_NAME: "cdutil"
+         REPO_NAME: "cdutil"
+         ENV_NAME: "test_cdutil"
+         CONDA_PY_VER: "python>=3.8,<3.9"
+      steps:
+         - checkout
+         - attach_workspace:
+              at: .
+         - run: *setup_run_tests
+         - run: *run_tests
+         - store_artifacts:
+              path: tests_html
+              destination: tests_html
+
+   linux_cdutil_py36:
       machine:
          image: circleci/classic:latest
       environment:
@@ -153,7 +172,7 @@ jobs:
          PKG_NAME: "cdutil"
          REPO_NAME: "cdutil"
          ENV_NAME: "test_cdutil"
-         CONDA_PY_VER: "python<3"
+         CONDA_PY_VER: "python>=3.6,<3.7"
       steps:
          - checkout
          - attach_workspace:
@@ -186,6 +205,25 @@ jobs:
               path: tests_html
               destination: tests_html
 
+   linux_cdutil_py38:
+      machine:
+         image: circleci/classic:latest
+      environment:
+         WORKDIR: /home/circleci/project/linux_build
+         PKG_NAME: "cdutil"
+         REPO_NAME: "cdutil"
+         ENV_NAME: "test_cdutil"
+         CONDA_PY_VER: "python>=3.8,<3.9"
+      steps:
+         - checkout
+         - attach_workspace:
+              at: .
+         - run: *setup_run_tests
+         - run: *run_tests
+         - store_artifacts:
+              path: tests_html
+              destination: tests_html
+
    upload:
       machine:
          image: circleci/classic:latest
@@ -207,21 +245,29 @@ workflows:
       jobs:
          - macos_setup
          - linux_setup
-         - macos_cdutil_py2:
+         - macos_cdutil_py36:
               requires:
                  - macos_setup
          - macos_cdutil_py37:
               requires:
                  - macos_setup
-         - linux_cdutil_py2:
+         - macos_cdutil_py38:
+              requires:
+                 - macos_setup
+         - linux_cdutil_py36:
               requires:
                  - linux_setup
          - linux_cdutil_py37:
               requires:
                  - linux_setup
+         - linux_cdutil_py38:
+              requires:
+                 - linux_setup
          - upload:
               requires:
-                 - macos_cdutil_py2
+                 - macos_cdutil_py36
                  - macos_cdutil_py37
-                 - linux_cdutil_py2
+                 - macos_cdutil_py38
+                 - linux_cdutil_py36
                  - linux_cdutil_py37
+                 - linux_cdutil_py38
