@@ -1,7 +1,6 @@
 import cdms2
 import MV2
 import os
-import cdat_info
 import pkg_resources
 
 egg_path = pkg_resources.resource_filename(pkg_resources.Requirement.parse("cdutil"), "share/cdutil")

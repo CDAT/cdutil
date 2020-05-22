@@ -4,7 +4,6 @@ import MV2
 import cdms2
 import cdtime
 import numpy.ma
-import cdat_info
 
 try:
     basestring
@@ -320,7 +319,7 @@ def mergeTime(ds, statusbar=1, fill_value=1.e20):
                         raise Exception  # to exit the it and i loops
                     elif val.value > vals[v]:
                         break
-        except BaseException as err:
+        except BaseException:
             pass
     if statusbar is not None and nt != 1:
         if not isinstance(prev[0], type(0)):

@@ -1,6 +1,5 @@
 # Adapted for numpy/ma/cdms2 by convertcdms.py
 from cdms2.selectors import SelectorComponent
-import cdat_info
 import warnings
 
 
