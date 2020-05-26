@@ -3,7 +3,6 @@ import MV2
 import genutil
 import cdms2
 import numpy
-import cdat_info
 
 
 def reconstructPressureFromHybrid(ps, A, B, Po):

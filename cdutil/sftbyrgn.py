@@ -9,7 +9,6 @@ import MV2
 import genutil
 import cdms2
 import os
-import cdat_info
 import pkg_resources
 
 
