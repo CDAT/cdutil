@@ -47,15 +47,14 @@ aliases:
        export CONDA_PY_VER="python=$PY_VER"
        export LIBNETCDF_VER="libnetcdf=*=${LIBNETCDF}_*"
        make setup-tests extra_pkgs="$CONDA_PY_VER $LIBNETCDF_VER $COVERAGE_PKGS"
-       make conda-dump-env workdir=$WORKDIR conda_env=$ENV_NAME artifact_dir=$PWD/spec_artifacts conda_env_filename=$CIRCLE_JOB
+       make conda-dump-env artifact_dir=$PWD/spec_artifacts conda_env_filename=$CIRCLE_JOB
 
   - &run_tests
     name: run_tests
     command: |
        source $BASH_ENV
        source $WORKDIR/miniconda/etc/profile.d/conda.sh
-       conda activate $ENV_NAME
-       make run-tests workdir=$WORKDIR
+       make run-tests
 
   - &conda_upload
     name: conda_upload
@@ -71,9 +70,8 @@ aliases:
     command: |
        source $BASH_ENV
        source $WORKDIR/miniconda/etc/profile.d/conda.sh
-       conda activate $ENV_NAME
-       coveralls
-       conda deactivate
+       conda activate base
+       make run-coveralls
 
 executors:
    linux:
