@@ -6,6 +6,10 @@ SHELL = /bin/bash
 
 os = $(shell uname)
 pkg_name = cdutil
+
+user ?= cdat
+label ?= nightly
+
 build_script = conda-recipes/build_tools/conda_build.py
 
 test_pkgs = testsrunner coverage coveralls
